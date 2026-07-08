@@ -72,15 +72,30 @@
 <!-- 로그인 후 -->
 <div class="admin-wrap" id="admin-panel" style="display:none">
   <div id="user-bar">
-    <h1 style="font-size:22px;font-weight:900">📋 주문 관리</h1>
+    <div style="display:flex;align-items:center;gap:10px">
+      <h1 style="font-size:22px;font-weight:900">📋 관리자</h1>
+      <button class="mini-btn" id="tab-orders" onclick="switchView('orders')">주문 관리</button>
+      <button class="mini-btn gray" id="tab-board" onclick="switchView('board')">게시판 관리 <span id="inq-badge"></span></button>
+    </div>
     <div style="display:flex;align-items:center;gap:12px">
       <span id="user-email" style="font-size:13px;color:var(--muted)"></span>
       <button class="mini-btn gray" onclick="logout()">로그아웃</button>
     </div>
   </div>
 
-  <div class="stat-row" id="stat-row"></div>
-  <div id="order-list"><div class="empty-msg">주문 불러오는 중...</div></div>
+  <!-- 주문 관리 뷰 -->
+  <div id="view-orders">
+    <div class="stat-row" id="stat-row"></div>
+    <div id="order-list"><div class="empty-msg">주문 불러오는 중...</div></div>
+  </div>
+
+  <!-- 게시판 관리 뷰 -->
+  <div id="view-board" style="display:none">
+    <h2 style="font-size:16px;font-weight:900;margin:6px 0 12px">🔒 비밀 문의</h2>
+    <div id="inquiry-list"><div class="empty-msg">불러오는 중...</div></div>
+    <h2 style="font-size:16px;font-weight:900;margin:26px 0 12px">📝 공개 게시판</h2>
+    <div id="board-list"><div class="empty-msg">불러오는 중...</div></div>
+  </div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -117,10 +132,19 @@ auth.onAuthStateChanged(user => {
   if (user) {
     document.getElementById('user-email').textContent = user.email;
     subscribeOrders();
+    subscribeBoard();
   } else if (unsubscribe) {
     unsubscribe();
   }
 });
+
+// ── 뷰 전환 (주문 / 게시판) ──
+function switchView(v) {
+  document.getElementById('view-orders').style.display = v === 'orders' ? 'block' : 'none';
+  document.getElementById('view-board').style.display = v === 'board' ? 'block' : 'none';
+  document.getElementById('tab-orders').className = 'mini-btn' + (v === 'orders' ? '' : ' gray');
+  document.getElementById('tab-board').className = 'mini-btn' + (v === 'board' ? '' : ' gray');
+}
 
 function subscribeOrders() {
   unsubscribe = db.collection('orders').orderBy('createdAt', 'desc').limit(300)
@@ -206,6 +230,73 @@ async function saveOrder(id) {
   } catch (err) {
     alert('저장 실패: ' + err.message);
   }
+}
+
+// ── 게시판 관리 ──
+function subscribeBoard() {
+  db.collection('inquiries').orderBy('createdAt', 'desc').limit(100)
+    .onSnapshot(snap => {
+      const badge = document.getElementById('inq-badge');
+      badge.textContent = snap.size ? `(${snap.size})` : '';
+      const wrap = document.getElementById('inquiry-list');
+      wrap.innerHTML = snap.empty
+        ? '<div class="empty-msg">비밀 문의가 없습니다.</div>'
+        : snap.docs.map(d => {
+            const p = d.data();
+            return `
+              <div class="order-card">
+                <div class="order-head">
+                  <span class="post-admin-name"><strong>${esc(p.name)}</strong>
+                    <span style="font-size:12px;color:var(--muted);margin-left:8px">📞 ${esc(p.contact) || '연락처 없음'}</span></span>
+                  <span class="order-date">${fmtDate(p.createdAt)}</span>
+                </div>
+                ${p.title ? `<div style="font-weight:900;margin-bottom:6px">${esc(p.title)}</div>` : ''}
+                <div style="font-size:14px;line-height:1.7;white-space:pre-wrap;word-break:break-word">${esc(p.content)}</div>
+                <div class="order-actions">
+                  <span style="font-size:12px;color:var(--muted)">※ 답변은 남긴 연락처로 직접 연락</span>
+                  <button class="mini-btn gray" style="margin-left:auto" onclick="deleteDoc('inquiries','${d.id}')">🗑 삭제</button>
+                </div>
+              </div>`;
+          }).join('');
+    });
+
+  db.collection('posts').orderBy('createdAt', 'desc').limit(100)
+    .onSnapshot(snap => {
+      const wrap = document.getElementById('board-list');
+      wrap.innerHTML = snap.empty
+        ? '<div class="empty-msg">게시글이 없습니다.</div>'
+        : snap.docs.map(d => {
+            const p = d.data();
+            return `
+              <div class="order-card">
+                <div class="order-head">
+                  <strong>${esc(p.name)}</strong>
+                  <span class="order-date">${fmtDate(p.createdAt)}</span>
+                </div>
+                ${p.title ? `<div style="font-weight:900;margin-bottom:6px">${esc(p.title)}</div>` : ''}
+                <div style="font-size:14px;line-height:1.7;white-space:pre-wrap;word-break:break-word;margin-bottom:10px">${esc(p.content)}</div>
+                <div class="order-actions">
+                  <input style="flex:1;min-width:200px" id="rp-${d.id}" placeholder="답변 입력 (게시판에 공개 표시됨)" value="${esc(p.reply) || ''}">
+                  <button class="mini-btn" onclick="saveReply('${d.id}')">💬 답변 저장</button>
+                  <button class="mini-btn gray" onclick="deleteDoc('posts','${d.id}')">🗑 삭제</button>
+                </div>
+              </div>`;
+          }).join('');
+    });
+}
+
+async function saveReply(id) {
+  const reply = document.getElementById('rp-' + id).value.trim();
+  try {
+    await db.collection('posts').doc(id).update({ reply });
+    alert(reply ? '답변이 등록되었습니다.' : '답변이 삭제되었습니다.');
+  } catch (err) { alert('저장 실패: ' + err.message); }
+}
+
+async function deleteDoc(col, id) {
+  if (!confirm('정말 삭제할까요? 되돌릴 수 없습니다.')) return;
+  try { await db.collection(col).doc(id).delete(); }
+  catch (err) { alert('삭제 실패: ' + err.message); }
 }
 
 function copyMsg(id) {

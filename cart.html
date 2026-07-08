@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>장바구니 | 코스트코 대행</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.cart-wrap { max-width: 760px; margin: 0 auto; }
+.cart-card { background:#fff; border-radius:14px; box-shadow:var(--shadow); overflow:hidden; }
+
+.cart-item {
+  display:grid; grid-template-columns:64px 1fr auto auto;
+  gap:14px; align-items:center; padding:16px 20px;
+  border-bottom:1px solid var(--border);
+}
+.cart-item img {
+  width:64px; height:64px; border-radius:8px; border:1px solid var(--border);
+  object-fit:contain; background:#fff; padding:4px;
+}
+.ci-name { font-size:14px; font-weight:700; line-height:1.4; margin-bottom:4px; }
+.ci-price { font-size:13px; color:var(--red); font-weight:900; }
+.ci-unitmax { font-size:11px; color:var(--muted); }
+
+.qty-box { display:flex; align-items:center; gap:0; border:1.5px solid var(--border); border-radius:8px; overflow:hidden; }
+.qty-btn {
+  width:32px; height:34px; border:none; background:#fff; font-size:16px;
+  font-weight:900; color:var(--primary); cursor:pointer;
+}
+.qty-btn:hover { background:#F0F4FF; }
+.qty-btn:disabled { color:#ccc; cursor:default; background:#fff; }
+.qty-val { width:36px; text-align:center; font-size:14px; font-weight:700; }
+
+.ci-remove { background:none; border:none; color:var(--muted); font-size:20px; cursor:pointer; padding:6px; }
+.ci-remove:hover { color:var(--red); }
+
+.cart-summary { padding:20px; background:var(--bg); }
+.cs-row { display:flex; justify-content:space-between; font-size:14px; padding:4px 0; }
+.cs-total { display:flex; justify-content:space-between; font-size:18px; font-weight:900; color:var(--red); padding-top:10px; margin-top:8px; border-top:1.5px solid var(--border); }
+
+.cart-actions { display:flex; gap:12px; margin-top:20px; flex-wrap:wrap; }
+.cart-actions .btn { flex:1; justify-content:center; min-width:160px; }
+
+.empty-cart { text-align:center; padding:70px 20px; }
+.empty-cart .ec-icon { font-size:52px; margin-bottom:14px; }
+.empty-cart p { color:var(--muted); margin-bottom:24px; }
+.clear-btn { background:none; border:none; color:var(--muted); font-size:13px; cursor:pointer; text-decoration:underline; margin-top:12px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">🛒 <span>코스트코</span>대행</div>
+    <div class="nav-links">
+      <a href="index.html">홈</a>
+      <a href="products.html">이번 주 상품</a>
+      <a href="board.html">문의·후기</a>
+      <a href="cart.html" class="nav-cart active">🛒 <span id="cart-badge" class="cart-badge"></span></a>
+      <a href="order.html" class="nav-cta btn">주문하기</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <h1>장바구니</h1>
+  <p>담은 상품을 확인하고 주문으로 넘어가세요</p>
+</div>
+
+<section class="section">
+  <div class="cart-wrap">
+    <div id="cart-content"><div style="text-align:center;padding:50px;color:var(--muted)">불러오는 중...</div></div>
+  </div>
+</section>
+
+<footer>
+  <strong>코스트코 대행 서비스</strong>
+  <div class="footer-links">
+    <a href="index.html">홈</a>
+    <a href="products.html">이번 주 상품</a>
+    <a href="board.html">문의·후기</a>
+    <a href="order.html">주문하기</a>
+  </div>
+  <p>카카오 채널 문의 | 운영시간: 평일 9:00~18:00</p>
+</footer>
+
+<script src="js/cart.js"></script>
+<script>
+let productMap = {}; // id → 상품 정보 (이미지·최대수량 표시용)
+
+fetch('data/products.json')
+  .then(r => r.json())
+  .then(data => {
+    if (Cart.syncWeek(data.week)) {
+      Cart.toast('상품이 새 주차로 바뀌어 장바구니를 비웠습니다');
+    }
+    data.products.forEach(p => productMap[p.id] = p);
+    render();
+  })
+  .catch(() => render());
+
+function render() {
+  const wrap = document.getElementById('cart-content');
+  const items = Cart.items();
+
+  if (!items.length) {
+    wrap.innerHTML = `
+      <div class="cart-card empty-cart">
+        <div class="ec-icon">🛒</div>
+        <p>장바구니가 비어 있습니다.<br>이번 주 할인 상품을 둘러보세요!</p>
+        <a href="products.html" class="btn btn-primary btn-lg">이번 주 상품 보기 →</a>
+      </div>`;
+    return;
+  }
+
+  const total = items.reduce((sum, it) => sum + it.price * it.qty, 0);
+  wrap.innerHTML = `
+    <div class="cart-card">
+      ${items.map(it => {
+        const p = productMap[it.id];
+        const max = p ? p.max_qty : 3;
+        return `
+          <div class="cart-item">
+            <img src="${p ? p.image : ''}" alt="" onerror="this.style.visibility='hidden'">
+            <div>
+              <div class="ci-name">${esc(it.name)}</div>
+              <div class="ci-price">${(it.price * it.qty).toLocaleString()}원
+                <span style="font-weight:400;color:var(--muted);font-size:11px">(개당 ${it.price.toLocaleString()}원)</span></div>
+              <div class="ci-unitmax">${p ? '📦 ' + p.unit + ' · ' : ''}최대 ${max}개</div>
+            </div>
+            <div class="qty-box">
+              <button class="qty-btn" onclick="changeQty(${it.id}, -1)" ${it.qty <= 1 ? 'disabled' : ''}>−</button>
+              <span class="qty-val">${it.qty}</span>
+              <button class="qty-btn" onclick="changeQty(${it.id}, 1)" ${it.qty >= max ? 'disabled' : ''}>+</button>
+            </div>
+            <button class="ci-remove" onclick="removeItem(${it.id})" title="삭제">✕</button>
+          </div>`;
+      }).join('')}
+      <div class="cart-summary">
+        <div class="cs-row"><span>상품 ${items.length}종 ${Cart.count()}개</span><span>${total.toLocaleString()}원</span></div>
+        <div class="cs-row"><span>택배비</span><span>별도 청구 (3,500~5,500원)</span></div>
+        <div class="cs-total"><span>예상 입금 금액</span><span>${total.toLocaleString()}원 + 택배비</span></div>
+      </div>
+    </div>
+    <div class="cart-actions">
+      <a href="products.html" class="btn btn-outline btn-lg">← 계속 쇼핑하기</a>
+      <a href="order.html" class="btn btn-red btn-lg">주문하기 (${Cart.count()}개) →</a>
+    </div>
+    <div style="text-align:center"><button class="clear-btn" onclick="clearAll()">장바구니 전체 비우기</button></div>`;
+}
+
+function changeQty(id, delta) {
+  const items = Cart.items();
+  const it = items.find(x => x.id === id);
+  if (!it) return;
+  const max = productMap[id] ? productMap[id].max_qty : 3;
+  it.qty = Math.max(1, Math.min(it.qty + delta, max));
+  Cart.setAll(items);
+  render();
+}
+
+function removeItem(id) {
+  Cart.remove(id);
+  render();
+}
+
+function clearAll() {
+  if (!confirm('장바구니를 전부 비울까요?')) return;
+  Cart.clear();
+  render();
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+}
+</script>
+</body>
+</html>

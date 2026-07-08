@@ -14,10 +14,27 @@
 
 /* ── 상품 추가 영역 ── */
 .item-row {
-  display:grid; grid-template-columns:1fr auto auto;
+  display:grid; grid-template-columns:auto 1fr auto auto;
   gap:10px; align-items:center; padding:14px;
   border:1.5px solid var(--border); border-radius:10px; margin-bottom:10px;
 }
+.item-thumb {
+  width:52px; height:52px; border-radius:8px; border:1px solid var(--border);
+  object-fit:contain; background:#fff; padding:3px; flex-shrink:0;
+}
+.item-thumb.empty { visibility:hidden; }
+
+/* ── 상품 미리보기 팝업 (마우스 호버) ── */
+#product-preview {
+  position:fixed; z-index:500; width:230px; display:none; pointer-events:none;
+  background:#fff; border-radius:12px; box-shadow:0 12px 36px rgba(0,0,0,.25);
+  overflow:hidden; border:1px solid var(--border);
+}
+#product-preview img { width:100%; height:150px; object-fit:contain; background:#fff; padding:10px; }
+#product-preview .pv-body { padding:10px 14px 14px; }
+#product-preview .pv-name { font-size:13px; font-weight:700; line-height:1.4; margin-bottom:4px; }
+#product-preview .pv-unit { font-size:11px; color:var(--muted); margin-bottom:6px; }
+#product-preview .pv-price { font-size:16px; font-weight:900; color:var(--red); }
 .item-row select { padding:10px; border-radius:8px; border:1.5px solid var(--border); font-size:14px; font-family:inherit; }
 .item-row input[type=number] { width:80px; padding:10px; border-radius:8px; border:1.5px solid var(--border); font-size:14px; text-align:center; }
 .item-remove { background:none; border:none; color:var(--red); font-size:22px; cursor:pointer; padding:4px; }
@@ -57,6 +74,8 @@
     <div class="nav-links">
       <a href="index.html">홈</a>
       <a href="products.html">이번 주 상품</a>
+      <a href="board.html">문의·후기</a>
+      <a href="cart.html" class="nav-cart" title="장바구니">🛒 <span id="cart-badge" class="cart-badge"></span></a>
       <a href="order.html" class="nav-cta btn active">주문하기</a>
     </div>
   </div>
@@ -226,6 +245,16 @@
   </div>
 </section>
 
+<!-- 상품 미리보기 팝업 (호버 시 표시) -->
+<div id="product-preview">
+  <img id="pv-img" src="" alt="">
+  <div class="pv-body">
+    <div class="pv-name" id="pv-name"></div>
+    <div class="pv-unit" id="pv-unit"></div>
+    <div class="pv-price" id="pv-price"></div>
+  </div>
+</div>
+
 <footer>
   <strong>코스트코 대행 서비스</strong>
   <div class="footer-links">
@@ -236,6 +265,7 @@
   <p>카카오 채널 문의 | 운영시간: 평일 9:00~18:00</p>
 </footer>
 
+<script src="js/cart.js"></script>
 <!-- Firebase (주문 DB 저장) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -319,10 +349,18 @@ fetch('data/products.json')
       document.getElementById('rollover-notice').style.display = 'flex';
       document.getElementById('hidden-week').value = '다음 주 이월';
     }
-    addItem(presetId ? parseInt(presetId) : null);
+
+    // 장바구니에 담아온 상품들로 주문서 자동 구성
+    Cart.syncWeek(data.week);
+    const cartItems = Cart.items().filter(it => products.some(p => p.id === it.id));
+    cartItems.forEach(it => addItem(it.id, it.qty));
+    // 상세 모달의 '바로 주문'으로 넘어온 상품 (장바구니에 없으면 행 추가)
+    const pid = presetId ? parseInt(presetId) : null;
+    if (pid && !cartItems.some(it => it.id === pid)) addItem(pid);
+    if (!document.querySelector('.item-row')) addItem(null);
   });
 
-function addItem(presetId) {
+function addItem(presetId, qty = 1) {
   itemCount++;
   const idx = itemCount;
   const container = document.getElementById('items-container');
@@ -330,11 +368,12 @@ function addItem(presetId) {
   div.className = 'item-row';
   div.id = 'item-' + idx;
   div.innerHTML = `
+    <img class="item-thumb empty" id="thumb-${idx}" src="" alt="상품 이미지" onerror="this.classList.add('empty')">
     <select onchange="updateSummary()" id="select-${idx}">
       <option value="">-- 상품 선택 --</option>
       ${products.map(p => `<option value="${p.id}" data-price="${p.sale_price}" data-name="${p.name}" data-max="${p.max_qty}" ${p.id == presetId ? 'selected' : ''}>${p.name} — ${p.sale_price.toLocaleString()}원</option>`).join('')}
     </select>
-    <input type="number" min="1" max="3" value="1" id="qty-${idx}" onchange="updateSummary()">
+    <input type="number" min="1" max="3" value="${qty}" id="qty-${idx}" onchange="updateSummary()">
     <button type="button" class="item-remove" onclick="removeItem(${idx})">✕</button>
   `;
   container.appendChild(div);
@@ -351,11 +390,23 @@ function updateSummary() {
   let total = 0;
   const summaryLines = [];
   const itemTexts = [];
+  const cartSync = []; // 주문서 현재 상태 → 장바구니 동기화용
 
   document.querySelectorAll('[id^="select-"]').forEach(sel => {
     const opt = sel.options[sel.selectedIndex];
-    if (!opt || !opt.value) return;
     const idx = sel.id.replace('select-', '');
+    // 선택된 상품 썸네일 표시
+    const thumb = document.getElementById('thumb-' + idx);
+    if (thumb) {
+      const prod = opt && opt.value ? products.find(p => p.id == opt.value) : null;
+      if (prod) {
+        thumb.src = prod.image;
+        thumb.classList.remove('empty');
+      } else {
+        thumb.classList.add('empty');
+      }
+    }
+    if (!opt || !opt.value) return;
     const qtyEl = document.getElementById('qty-' + idx);
     const qty = parseInt(qtyEl?.value || 1);
     const max = parseInt(opt.dataset.max || 3);
@@ -364,9 +415,13 @@ function updateSummary() {
     const name = opt.dataset.name;
     const subtotal = price * Math.min(qty, max);
     total += subtotal;
-    summaryLines.push(`<div class="summary-row"><span>${name} × ${Math.min(qty,max)}</span><span>${subtotal.toLocaleString()}원</span></div>`);
+    summaryLines.push(`<div class="summary-row" data-pid="${opt.value}"><span>${name} × ${Math.min(qty,max)}</span><span>${subtotal.toLocaleString()}원</span></div>`);
     itemTexts.push(`${name} × ${Math.min(qty,max)}개 (${subtotal.toLocaleString()}원)`);
+    cartSync.push({ id: parseInt(opt.value), name, price, qty: Math.min(qty, max) });
   });
+
+  // 주문서 내용을 장바구니에 그대로 반영 (삭제·변경 동기화)
+  if (products.length) Cart.setAll(cartSync);
 
   document.getElementById('summary-items').innerHTML = summaryLines.length
     ? summaryLines.join('') : '<p style="color:var(--muted);font-size:14px">상품을 선택해주세요</p>';
@@ -444,6 +499,7 @@ document.getElementById('order-form').addEventListener('submit', async e => {
   localStorage.setItem('lastOrderNo', orderNo);
   localStorage.setItem('lastOrderTotal', document.getElementById('sum-total').textContent);
   saveCustomerInfo(); // 다음 주문 때 자동 입력용
+  Cart.clear();       // 주문 완료된 상품은 장바구니에서 비움
 
   dbSaved = true;
   e.target.submit();
@@ -452,6 +508,46 @@ document.getElementById('order-form').addEventListener('submit', async e => {
 function copyAccount() {
   navigator.clipboard.writeText('3333-00-0000000')
     .then(() => alert('계좌번호가 복사되었습니다.'));
+}
+
+// ── 상품 미리보기 팝업 (마우스 호버 — 터치 기기 제외) ──
+if (window.matchMedia('(hover: hover)').matches) {
+  const pv = document.getElementById('product-preview');
+
+  function pidFromTarget(target) {
+    const row = target.closest?.('.item-row');
+    if (row) return row.querySelector('select')?.value || null;
+    const sumRow = target.closest?.('.summary-row[data-pid]');
+    if (sumRow) return sumRow.dataset.pid;
+    return null;
+  }
+
+  function positionPreview(e) {
+    const margin = 16, w = 230, h = pv.offsetHeight || 240;
+    let x = e.clientX + margin, y = e.clientY + margin;
+    if (x + w > window.innerWidth) x = e.clientX - w - margin;
+    if (y + h > window.innerHeight) y = window.innerHeight - h - margin;
+    pv.style.left = x + 'px';
+    pv.style.top = Math.max(8, y) + 'px';
+  }
+
+  document.addEventListener('mouseover', e => {
+    const pid = pidFromTarget(e.target);
+    const p = pid ? products.find(x => x.id == pid) : null;
+    if (!p) { pv.style.display = 'none'; return; }
+    document.getElementById('pv-img').src = p.image;
+    document.getElementById('pv-name').textContent = p.name;
+    document.getElementById('pv-unit').textContent = '📦 ' + p.unit + ' · 최대 ' + p.max_qty + '개';
+    document.getElementById('pv-price').textContent = p.sale_price.toLocaleString() + '원';
+    pv.style.display = 'block';
+    positionPreview(e);
+  });
+  document.addEventListener('mousemove', e => {
+    if (pv.style.display === 'block') positionPreview(e);
+  });
+  document.addEventListener('mouseout', e => {
+    if (!pidFromTarget(e.relatedTarget || document.body)) pv.style.display = 'none';
+  });
 }
 </script>
 </body>

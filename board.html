@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>문의 · 후기 | 코스트코 대행</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.board-wrap { max-width: 800px; margin: 0 auto; }
+
+/* 작성 폼 */
+.write-card { background:#fff; border-radius:14px; padding:24px; box-shadow:var(--shadow); margin-bottom:28px; }
+.write-card textarea { min-height:90px; resize:vertical; }
+.secret-row { display:flex; align-items:center; gap:8px; font-size:14px; margin-bottom:16px; }
+.secret-row input[type=checkbox] { width:18px; height:18px; accent-color:var(--primary); }
+.secret-hint { font-size:12px; color:var(--muted); }
+.char-count { float:right; font-size:12px; font-weight:400; color:var(--muted); }
+.char-count.limit { color:var(--red); font-weight:700; }
+
+/* 게시판 테이블 */
+.board-table { background:#fff; border-radius:12px; box-shadow:var(--shadow); overflow:hidden; }
+.bt-head, .bt-row {
+  display:grid; grid-template-columns:64px 1fr 110px 90px;
+  gap:10px; align-items:center; padding:13px 18px;
+}
+.bt-head {
+  background:var(--primary); color:#fff; font-size:13px; font-weight:700;
+}
+.bt-row { border-top:1px solid var(--border); cursor:pointer; transition:background .12s; font-size:14px; }
+.bt-row:hover { background:#F0F4FF; }
+.bt-num { color:var(--muted); font-size:13px; text-align:center; }
+.bt-title { display:flex; align-items:center; gap:8px; min-width:0; font-weight:600; }
+.bt-title .t-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.reply-badge {
+  flex-shrink:0; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px;
+  background:#D1FAE5; color:#065F46;
+}
+.bt-name { font-size:13px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.bt-date { font-size:12px; color:var(--muted); text-align:right; }
+.bt-detail { border-top:1px solid var(--border); background:var(--bg); padding:18px 22px; }
+.bt-detail .post-content { font-size:14px; line-height:1.7; white-space:pre-wrap; word-break:break-word; }
+.post-reply {
+  margin-top:14px; background:#F0F4FF; border-left:3px solid var(--primary);
+  border-radius:0 8px 8px 0; padding:12px 14px; font-size:13px; line-height:1.6;
+  white-space:pre-wrap; word-break:break-word;
+}
+.post-reply b { color:var(--primary); display:block; margin-bottom:4px; font-size:12px; }
+.empty-msg { text-align:center; color:var(--muted); padding:50px; }
+
+/* 페이지네이션 */
+.pagination { display:flex; justify-content:center; align-items:center; gap:6px; margin-top:24px; flex-wrap:wrap; }
+.page-btn {
+  min-width:36px; height:36px; padding:0 10px; border-radius:8px;
+  border:1.5px solid var(--border); background:#fff;
+  font-size:14px; font-weight:700; color:var(--muted); cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:all .15s;
+}
+.page-btn:hover:not(:disabled) { border-color:var(--primary); color:var(--primary); }
+.page-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+.page-btn:disabled { opacity:.4; cursor:default; }
+.page-info { font-size:13px; color:var(--muted); text-align:center; margin-top:8px; }
+
+@media (max-width:600px) {
+  .bt-head, .bt-row { grid-template-columns:1fr 80px 70px; padding:12px 14px; }
+  .bt-num { display:none; }
+  .bt-head span:first-child { display:none; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">🛒 <span>코스트코</span>대행</div>
+    <div class="nav-links">
+      <a href="index.html">홈</a>
+      <a href="products.html">이번 주 상품</a>
+      <a href="board.html" class="active">문의·후기</a>
+      <a href="cart.html" class="nav-cart" title="장바구니">🛒 <span id="cart-badge" class="cart-badge"></span></a>
+      <a href="order.html" class="nav-cta btn">주문하기</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <h1>문의 · 후기</h1>
+  <p>궁금한 점, 이용 후기를 자유롭게 남겨주세요</p>
+</div>
+
+<section class="section">
+  <div class="board-wrap">
+
+    <!-- 작성 폼 -->
+    <div class="write-card">
+      <div class="form-row">
+        <div class="form-group">
+          <label>닉네임 <span class="required">*</span>
+            <span class="char-count" id="cnt-name">0 / 20자</span></label>
+          <input type="text" id="w-name" maxlength="20" placeholder="닉네임을 입력해주세요">
+        </div>
+        <div class="form-group" id="contact-group" style="display:none">
+          <label>연락처 <span class="secret-hint">(답변받으실 번호/카톡ID)</span></label>
+          <input type="text" id="w-contact" maxlength="40" placeholder="010-0000-0000 또는 카톡ID">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>제목 <span class="required">*</span>
+          <span class="char-count" id="cnt-title">0 / 50자</span></label>
+        <input type="text" id="w-title" maxlength="50" placeholder="제목을 입력해주세요">
+      </div>
+      <div class="form-group">
+        <label>내용 <span class="required">*</span>
+          <span class="char-count" id="cnt-content">0 / 1,000자</span></label>
+        <textarea id="w-content" maxlength="1000" placeholder="문의사항이나 이용 후기를 남겨주세요"></textarea>
+      </div>
+      <div class="secret-row">
+        <input type="checkbox" id="w-secret">
+        <label for="w-secret" style="margin:0; font-weight:700">🔒 비밀 문의로 보내기</label>
+        <span class="secret-hint">— 게시판에 공개되지 않고 관리자에게만 전달됩니다</span>
+      </div>
+      <button class="btn btn-primary btn-full" id="w-submit">등록하기</button>
+    </div>
+
+    <!-- 글 목록 (게시판 테이블) -->
+    <div class="board-table">
+      <div class="bt-head"><span>번호</span><span>제목</span><span>작성자</span><span style="text-align:right">날짜</span></div>
+      <div id="post-list"><div class="empty-msg">글 불러오는 중...</div></div>
+    </div>
+    <div class="pagination" id="board-pagination"></div>
+    <div class="page-info" id="board-page-info"></div>
+
+  </div>
+</section>
+
+<footer>
+  <strong>코스트코 대행 서비스</strong>
+  <div class="footer-links">
+    <a href="index.html">홈</a>
+    <a href="products.html">이번 주 상품</a>
+    <a href="board.html">문의·후기</a>
+    <a href="order.html">주문하기</a>
+  </div>
+  <p>카카오 채널 문의 | 운영시간: 평일 9:00~18:00</p>
+</footer>
+
+<script src="js/cart.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDSUUtoHiO3WtJ1IOiFfTPqLlCIG-_LfEI",
+  authDomain: "costco-proxy.firebaseapp.com",
+  projectId: "costco-proxy",
+  storageBucket: "costco-proxy.firebasestorage.app",
+  messagingSenderId: "145929393279",
+  appId: "1:145929393279:web:30f77a53a4f3fcaec79b4a"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+}
+function fmtDate(ts) {
+  if (!ts || !ts.toDate) return '';
+  const d = ts.toDate();
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// 비밀글 체크 시 연락처 입력칸 표시
+document.getElementById('w-secret').addEventListener('change', e => {
+  document.getElementById('contact-group').style.display = e.target.checked ? 'block' : 'none';
+});
+
+// 실시간 글자수 카운터
+function bindCounter(inputId, counterId, max) {
+  const input = document.getElementById(inputId);
+  const counter = document.getElementById(counterId);
+  input.addEventListener('input', () => {
+    counter.textContent = `${input.value.length.toLocaleString()} / ${max.toLocaleString()}자`;
+    counter.classList.toggle('limit', input.value.length >= max);
+  });
+}
+bindCounter('w-name', 'cnt-name', 20);
+bindCounter('w-title', 'cnt-title', 50);
+bindCounter('w-content', 'cnt-content', 1000);
+
+// 글 등록
+document.getElementById('w-submit').addEventListener('click', async () => {
+  const name = document.getElementById('w-name').value.trim();
+  const title = document.getElementById('w-title').value.trim();
+  const content = document.getElementById('w-content').value.trim();
+  const secret = document.getElementById('w-secret').checked;
+  const contact = document.getElementById('w-contact').value.trim();
+  if (!name) return alert('닉네임을 입력해주세요.');
+  if (!title) return alert('제목을 입력해주세요.');
+  if (!content) return alert('내용을 입력해주세요.');
+
+  const btn = document.getElementById('w-submit');
+  btn.disabled = true; btn.textContent = '등록 중...';
+  try {
+    if (secret) {
+      await db.collection('inquiries').add({
+        name, title, content, contact,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      alert('비밀 문의가 접수되었습니다. 남겨주신 연락처로 답변드리겠습니다.');
+    } else {
+      await db.collection('posts').add({
+        name, title, content,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      boardPage = 1; // 등록한 글이 보이도록 첫 페이지로
+    }
+    ['w-name', 'w-title', 'w-content', 'w-contact'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('w-secret').checked = false;
+    document.getElementById('contact-group').style.display = 'none';
+    document.getElementById('cnt-name').textContent = '0 / 20자';
+    document.getElementById('cnt-title').textContent = '0 / 50자';
+    document.getElementById('cnt-content').textContent = '0 / 1,000자';
+    document.querySelectorAll('.char-count').forEach(el => el.classList.remove('limit'));
+  } catch (err) {
+    alert('등록에 실패했습니다: ' + err.message);
+  }
+  btn.disabled = false; btn.textContent = '등록하기';
+});
+
+// ── 공개글 목록 (일반 게시판 스타일: 10개씩, 클릭하면 내용 펼침) ──
+let allPosts = [];
+let boardPage = 1;
+let expandedId = null;
+const BOARD_PAGE_SIZE = 10;
+
+db.collection('posts').orderBy('createdAt', 'desc').limit(300)
+  .onSnapshot(snap => {
+    allPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    renderBoard();
+  }, () => {
+    document.getElementById('post-list').innerHTML =
+      '<div class="empty-msg">⚠️ 글을 불러올 수 없습니다. 보안 규칙이 업데이트되었는지 확인해주세요.</div>';
+  });
+
+function renderBoard() {
+  const wrap = document.getElementById('post-list');
+  const total = allPosts.length;
+  const totalPages = Math.max(1, Math.ceil(total / BOARD_PAGE_SIZE));
+  if (boardPage > totalPages) boardPage = totalPages;
+
+  if (!total) {
+    wrap.innerHTML = '<div class="empty-msg">아직 등록된 글이 없습니다. 첫 글을 남겨주세요!</div>';
+    renderBoardPagination(totalPages, total);
+    return;
+  }
+
+  const start = (boardPage - 1) * BOARD_PAGE_SIZE;
+  const pageItems = allPosts.slice(start, start + BOARD_PAGE_SIZE);
+
+  wrap.innerHTML = pageItems.map((p, i) => {
+    const num = total - start - i; // 게시판 번호 (최신 글이 큰 번호)
+    const title = p.title || (p.content || '').slice(0, 40) || '(제목 없음)';
+    const open = expandedId === p.id;
+    return `
+      <div class="bt-row" onclick="togglePost('${p.id}')">
+        <span class="bt-num">${num}</span>
+        <span class="bt-title">
+          <span class="t-text">${esc(title)}</span>
+          ${p.reply ? '<span class="reply-badge">답변완료</span>' : ''}
+        </span>
+        <span class="bt-name">${esc(p.name)}</span>
+        <span class="bt-date">${fmtDate(p.createdAt)}</span>
+      </div>
+      ${open ? `
+        <div class="bt-detail">
+          <div class="post-content">${esc(p.content)}</div>
+          ${p.reply ? `<div class="post-reply"><b>💬 관리자 답변</b>${esc(p.reply)}</div>` : ''}
+        </div>` : ''}`;
+  }).join('');
+
+  renderBoardPagination(totalPages, total);
+}
+
+function togglePost(id) {
+  expandedId = expandedId === id ? null : id;
+  renderBoard();
+}
+
+function renderBoardPagination(totalPages, total) {
+  const wrap = document.getElementById('board-pagination');
+  const info = document.getElementById('board-page-info');
+  if (totalPages <= 1) {
+    wrap.innerHTML = '';
+    info.textContent = total ? `전체 ${total}개 글` : '';
+    return;
+  }
+  let start = Math.max(1, boardPage - 2);
+  let end = Math.min(totalPages, start + 4);
+  start = Math.max(1, end - 4);
+
+  let html = `<button class="page-btn" onclick="goBoardPage(${boardPage - 1})" ${boardPage === 1 ? 'disabled' : ''}>‹</button>`;
+  if (start > 1) html += `<button class="page-btn" onclick="goBoardPage(1)">1</button>` + (start > 2 ? '<span style="color:var(--muted)">…</span>' : '');
+  for (let i = start; i <= end; i++) {
+    html += `<button class="page-btn ${i === boardPage ? 'active' : ''}" onclick="goBoardPage(${i})">${i}</button>`;
+  }
+  if (end < totalPages) html += (end < totalPages - 1 ? '<span style="color:var(--muted)">…</span>' : '') + `<button class="page-btn" onclick="goBoardPage(${totalPages})">${totalPages}</button>`;
+  html += `<button class="page-btn" onclick="goBoardPage(${boardPage + 1})" ${boardPage === totalPages ? 'disabled' : ''}>›</button>`;
+  wrap.innerHTML = html;
+  info.textContent = `전체 ${total}개 글 · ${boardPage} / ${totalPages} 페이지`;
+}
+
+function goBoardPage(page) {
+  boardPage = page;
+  expandedId = null;
+  renderBoard();
+  document.querySelector('.board-table').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+</script>
+</body>
+</html>

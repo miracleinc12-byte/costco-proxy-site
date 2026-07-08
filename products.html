@@ -104,6 +104,8 @@
     <div class="nav-links">
       <a href="index.html">홈</a>
       <a href="products.html" class="active">이번 주 상품</a>
+      <a href="board.html">문의·후기</a>
+      <a href="cart.html" class="nav-cart" title="장바구니">🛒 <span id="cart-badge" class="cart-badge"></span></a>
       <a href="order.html" class="nav-cta btn">주문하기</a>
     </div>
   </div>
@@ -130,12 +132,19 @@
         </div>
       </div>
       <div class="alert alert-blue" style="margin-top:12px;" id="notice-box"></div>
+      <div class="alert alert-green" style="margin-top:12px;">
+        💡 <div><strong>대행가 = 코스트코 실구매가 + 수수료(최대 15%)</strong> — 할인 상품의 대행가는 <strong>항상 코스트코 정가보다 낮게</strong> 책정됩니다. 할인 혜택은 그대로 받으세요!</div>
+      </div>
+      <div class="alert alert-blue" style="margin-top:12px;">
+        📄 <div><strong>"상세정보" 배지가 붙은 상품</strong>은 <strong>상세보기</strong>를 누르면 상품 상세페이지(이미지)를 확인하실 수 있습니다.</div>
+      </div>
     </div>
 
     <!-- 카테고리 필터 -->
     <div class="filter-bar" id="filter-bar">
       <button class="filter-btn active" data-cat="전체">전체</button>
     </div>
+
 
     <!-- 상품 그리드 -->
     <div class="product-grid" id="product-grid">
@@ -156,19 +165,30 @@
   <div class="modal" style="position:relative">
     <button class="modal-close" id="modal-close">✕</button>
     <img id="modal-img" src="" alt="" class="modal-img">
+    <div id="modal-gallery" style="display:flex;gap:6px;padding:8px 14px 0;overflow-x:auto"></div>
     <div class="modal-body">
       <div id="modal-badges"></div>
       <div class="modal-name" id="modal-name"></div>
       <div style="color:var(--muted);font-size:13px;margin-bottom:14px" id="modal-unit"></div>
       <p style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px" id="modal-desc"></p>
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+      <div style="font-size:12px;color:var(--muted)" id="modal-costco-price"></div>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
         <span style="font-size:26px;font-weight:900;color:var(--red)" id="modal-price"></span>
+        <span class="margin-chip">대행가 · 수수료 포함</span>
         <span style="font-size:12px;color:var(--muted)" id="modal-info"></span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">
+        ✔ 수수료(최대 15%)는 <strong>할인이 적용된 실구매가</strong> 기준이며, 할인 상품의 대행가는 <strong>항상 정가보다 낮습니다</strong>
       </div>
       <div class="alert alert-yellow" style="margin-bottom:16px;font-size:13px" id="modal-cold-notice" hidden>
         ❄️ 냉장·냉동 제품으로 보냉 포장비(1,000~3,000원)가 별도 추가됩니다.
       </div>
-      <a href="order.html" class="btn btn-red btn-full btn-lg" id="modal-order-btn">이 상품 주문하기 →</a>
+      <!-- 상세컷 이미지 (쇼핑몰식 상세페이지) -->
+      <div id="modal-detail-imgs" style="margin-bottom:16px"></div>
+      <div style="display:flex; gap:10px">
+        <button type="button" class="btn btn-primary btn-lg" style="flex:1; justify-content:center" id="modal-cart-btn">🛒 장바구니 담기</button>
+        <a href="order.html" class="btn btn-red btn-lg" style="flex:1; justify-content:center" id="modal-order-btn">바로 주문 →</a>
+      </div>
     </div>
   </div>
 </div>
@@ -183,6 +203,7 @@
   <p>카카오 채널 문의 | 운영시간: 평일 9:00~18:00</p>
 </footer>
 
+<script src="js/cart.js"></script>
 <script>
 let allProducts = [];
 let currentCat = '전체';
@@ -193,6 +214,9 @@ fetch('data/products.json')
   .then(r => r.json())
   .then(data => {
     allProducts = data.products;
+    if (Cart.syncWeek(data.week)) {
+      Cart.toast('상품이 새 주차로 바뀌어 장바구니를 비웠습니다');
+    }
     document.getElementById('week-title').textContent = data.week;
     document.getElementById('notice-box').innerHTML = '📢 ' + (data.notice || '');
 
@@ -239,6 +263,7 @@ function renderProducts() {
         <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/400x200/003DA5/FFFFFF?text=${encodeURIComponent(p.name)}'">
         <div class="product-badges">
           ${p.badge ? `<span class="badge badge-red">${p.badge}</span>` : ''}
+          ${p.detail_images && p.detail_images.length ? '<span class="badge badge-blue">📄 상세정보</span>' : ''}
         </div>
         ${p.cold ? '<span class="cold-badge">❄️ 냉장</span>' : ''}
       </div>
@@ -247,14 +272,21 @@ function renderProducts() {
         <div class="product-name">${p.name}</div>
         <div class="product-unit">📦 ${p.unit}</div>
         <div class="product-desc">${p.description}</div>
+        <div style="font-size:12px; color:var(--muted); margin-bottom:2px">
+          ${p.origin_price && p.origin_price > p.costco_price ? `정가 <s>${p.origin_price.toLocaleString()}원</s> → ` : ''}코스트코 할인가 ${p.costco_price.toLocaleString()}원
+        </div>
         <div class="product-price-row">
           <span class="product-sale-price">${p.sale_price.toLocaleString()}원</span>
+          <span class="margin-chip">대행가</span>
           <div class="product-info">
             <small>최대 ${p.max_qty}개 주문 가능</small>
             <small>+ 택배비 별도</small>
           </div>
         </div>
-        <button class="product-btn" onclick="openModal(${p.id})">상세보기 / 주문</button>
+        <div style="display:flex; gap:8px;">
+          <button class="product-btn" style="flex:1" onclick="openModal(${p.id})">상세보기</button>
+          <button class="product-btn" style="flex:1; background:var(--red)" onclick="addCart(${p.id})">🛒 담기</button>
+        </div>
       </div>
     </div>
   `).join('');
@@ -295,15 +327,42 @@ function goPage(page) {
   document.getElementById('filter-bar').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function addCart(id) {
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
+  Cart.add(p);
+  Cart.toast(`"${p.name}" 담았습니다 (${Cart.count()}개)`);
+}
+
 function openModal(id) {
   const p = allProducts.find(x => x.id === id);
   if (!p) return;
+  document.getElementById('modal-cart-btn').onclick = () => { addCart(id); closeModal(); };
   document.getElementById('modal-img').src = p.image;
   document.getElementById('modal-badges').innerHTML =
     `<span class="badge badge-blue">${p.category}</span> ${p.badge ? `<span class="badge badge-red" style="margin-left:4px">${p.badge}</span>` : ''}`;
   document.getElementById('modal-name').textContent = p.name;
   document.getElementById('modal-unit').textContent = '📦 ' + p.unit + ' | 최대 ' + p.max_qty + '개';
   document.getElementById('modal-desc').textContent = p.description;
+  document.getElementById('modal-costco-price').innerHTML =
+    (p.origin_price && p.origin_price > p.costco_price
+      ? `정가 <s>${p.origin_price.toLocaleString()}원</s> → ` : '')
+    + '코스트코 할인가 ' + p.costco_price.toLocaleString() + '원';
+
+  // 갤러리 썸네일 (클릭하면 큰 이미지 교체)
+  const gallery = p.gallery && p.gallery.length ? p.gallery : [p.image];
+  document.getElementById('modal-gallery').innerHTML = gallery.length > 1
+    ? gallery.map(u => `<img src="${u}" onclick="document.getElementById('modal-img').src='${u}'"
+        style="width:52px;height:52px;object-fit:contain;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:3px;cursor:pointer;flex-shrink:0">`).join('')
+    : '';
+
+  // 상세컷 이미지 (쇼핑몰식 상세페이지 — 세로로 이어서 표시)
+  const detailImgs = p.detail_images || [];
+  document.getElementById('modal-detail-imgs').innerHTML = detailImgs.length
+    ? `<div style="font-size:13px;font-weight:700;color:var(--primary);margin-bottom:8px">📄 상품 상세정보</div>`
+      + detailImgs.map(u =>
+        `<img src="${u}" loading="lazy" style="width:100%;display:block;border-radius:8px;margin-bottom:6px" onerror="this.remove()">`).join('')
+    : '';
   document.getElementById('modal-price').textContent = p.sale_price.toLocaleString() + '원';
   document.getElementById('modal-info').innerHTML = '택배비 별도<br>최대 ' + p.max_qty + '개 주문 가능';
   document.getElementById('modal-cold-notice').hidden = !p.cold;

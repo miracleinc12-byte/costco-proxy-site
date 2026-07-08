@@ -158,6 +158,8 @@
     <div class="nav-links">
       <a href="index.html" class="active">홈</a>
       <a href="products.html">이번 주 상품</a>
+      <a href="board.html">문의·후기</a>
+      <a href="cart.html" class="nav-cart" title="장바구니">🛒 <span id="cart-badge" class="cart-badge"></span></a>
       <a href="order.html" class="nav-cta btn">주문하기</a>
     </div>
   </div>
@@ -319,7 +321,7 @@
       <div class="review-card">
         <div style="font-size:28px;margin-bottom:10px">🧾</div>
         <div style="font-weight:900;margin-bottom:8px">투명한 가격</div>
-        <div class="review-text">코스트코 판매가에 수수료 15%만 더한 가격입니다. 상품마다 코스트코 가격을 그대로 공개하니 직접 비교해보세요.</div>
+        <div class="review-text">코스트코 실구매가에 수수료(최대 15%)만 더한 가격입니다. 할인 상품의 대행가는 항상 정가보다 낮게 책정 — 할인 혜택은 그대로 받으세요.</div>
       </div>
       <div class="review-card">
         <div style="font-size:28px;margin-bottom:10px">📅</div>
@@ -358,6 +360,10 @@
       <div class="faq-item">
         <div class="faq-q">코스트코 회원권이 없어도 주문할 수 있나요? <span class="faq-icon">+</span></div>
         <div class="faq-a">네, 회원권이 없어도 이용하실 수 있습니다. 대행 서비스를 통해 코스트코 회원권 없이 인기 상품을 구매하실 수 있습니다.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">대행 수수료는 어떻게 계산되나요? <span class="faq-icon">+</span></div>
+        <div class="faq-a">수수료(최대 15%)는 정가가 아니라 <strong>할인이 적용된 코스트코 실구매가</strong>에 붙습니다. 예를 들어 정가 93,900원 상품이 18,000원 할인 중이면, 할인가 75,900원에 15%를 더한 87,300원이 대행가입니다. 할인폭이 작은 상품은 수수료를 그보다 낮춰서 <strong>할인 상품의 대행가는 항상 코스트코 정가보다 낮게</strong> 책정됩니다. 할인이 없는 인기 상품은 판매가 + 15%입니다.</div>
       </div>
       <div class="faq-item">
         <div class="faq-q">결제는 어떻게 하나요? <span class="faq-icon">+</span></div>
@@ -400,6 +406,7 @@
 
 <a href="order.html" class="floating-cta">📝 바로 주문하기</a>
 
+<script src="js/cart.js"></script>
 <script>
 // 프리뷰 상품 로드
 fetch('data/products.json')
