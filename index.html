@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>코스트코 대행 | 회원권 없이도 코스트코 인기 상품을</title>
+<meta name="description" content="코스트코 회원권 없이도 인기 상품을 집에서 받아보세요. 매주 할인 상품 업데이트, 주문 후 48시간 내 배송.">
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* ── 히어로 ── */
+.hero {
+  background: linear-gradient(135deg, #002980 0%, #003DA5 50%, #1a56c4 100%);
+  color: #fff; padding: 80px 24px 70px; text-align: center; position: relative; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute; inset: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Ccircle cx='30' cy='30' r='20'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+}
+.hero > * { position: relative; }
+.hero-eyebrow {
+  display: inline-block; background: rgba(255,215,0,.2); color: #FFD700;
+  padding: 5px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; margin-bottom: 20px;
+}
+.hero h1 { font-size: clamp(28px, 5vw, 52px); font-weight: 900; line-height: 1.2; margin-bottom: 20px; }
+.hero h1 em { color: #FFD700; font-style: normal; }
+.hero p { font-size: 18px; opacity: .85; max-width: 580px; margin: 0 auto 36px; }
+.hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+
+/* ── 신뢰 지표 ── */
+.trust-bar {
+  background: #fff; border-bottom: 1px solid var(--border);
+  padding: 20px 24px;
+}
+.trust-bar .container { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; }
+.trust-item { display: flex; align-items: center; gap: 10px; }
+.trust-icon { font-size: 24px; }
+.trust-label { font-size: 13px; font-weight: 700; color: var(--muted); }
+.trust-value { font-size: 20px; font-weight: 900; color: var(--primary); }
+
+/* ── 프로세스 ── */
+.process-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px; position: relative;
+}
+.process-card {
+  background: #fff; border-radius: 12px; padding: 28px 20px; text-align: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,.07); position: relative;
+}
+.process-num {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--primary); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; font-weight: 900; margin: 0 auto 14px;
+}
+.process-icon { font-size: 32px; margin-bottom: 10px; }
+.process-card h3 { font-size: 16px; font-weight: 700; margin-bottom: 6px; color: var(--primary); }
+.process-card p { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.process-arrow {
+  position: absolute; right: -20px; top: 50%;
+  transform: translateY(-50%); color: var(--primary); font-size: 20px; z-index: 1;
+}
+
+/* ── 이번 주 상품 프리뷰 ── */
+.preview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+.preview-card {
+  background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.07);
+  overflow: hidden; transition: transform .2s, box-shadow .2s;
+}
+.preview-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,.13); }
+.preview-card img { width: 100%; height: 180px; object-fit: contain; background: #fff; padding: 12px; border-bottom: 1px solid var(--border); }
+.preview-card-body { padding: 16px; }
+.preview-card-body h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.price-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.sale-price { font-size: 20px; font-weight: 900; color: var(--red); }
+.origin-price { font-size: 13px; color: var(--muted); text-decoration: line-through; }
+.margin-chip { font-size: 11px; font-weight: 700; background: #FEE2E2; color: var(--red); padding: 2px 8px; border-radius: 4px; }
+
+/* ── FAQ ── */
+.faq-list { max-width: 760px; margin: 0 auto; }
+.faq-item { background: #fff; border-radius: 10px; margin-bottom: 12px; overflow: hidden; }
+.faq-q {
+  padding: 18px 20px; font-weight: 700; cursor: pointer;
+  display: flex; justify-content: space-between; align-items: center;
+  transition: background .15s;
+}
+.faq-q:hover { background: #F0F4FF; }
+.faq-a {
+  max-height: 0; overflow: hidden; transition: max-height .3s ease, padding .3s ease;
+  color: var(--muted); font-size: 14px; line-height: 1.7;
+}
+.faq-a.open { max-height: 300px; padding: 0 20px 16px; }
+.faq-icon { transition: transform .3s; color: var(--primary); font-size: 20px; }
+.faq-item.active .faq-icon { transform: rotate(45deg); }
+
+/* ── CTA 배너 ── */
+.cta-banner {
+  background: linear-gradient(135deg, var(--red) 0%, #c01132 100%);
+  color: #fff; text-align: center; padding: 60px 24px; border-radius: 20px;
+  margin: 0 24px 64px;
+}
+.cta-banner h2 { font-size: clamp(22px, 4vw, 36px); font-weight: 900; margin-bottom: 12px; }
+.cta-banner p { opacity: .9; margin-bottom: 28px; font-size: 16px; }
+
+/* ── 히어로 미니 통계 / 스크롤 큐 ── */
+.hero-stats-mini { display:flex; gap:28px; justify-content:center; flex-wrap:wrap; margin-top:8px; font-size:13px; opacity:.85; }
+.hero-stats-mini strong { color:#FFD700; font-size:15px; }
+.scroll-cue {
+  position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
+  color:#fff; opacity:.6; font-size:26px; animation: bounce 1.8s infinite; display:block;
+}
+@keyframes bounce { 0%,100%{ transform:translate(-50%,0); } 50%{ transform:translate(-50%,8px); } }
+
+/* ── 마감 임박 알림바 ── */
+.urgency-bar { background:#111827; color:#fff; padding:10px 24px; text-align:center; font-size:13px; font-weight:700; }
+.urgency-bar a { color:#FFD700; }
+
+/* ── 통계 + 비교 ── */
+.stats-compare-grid { display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center; }
+@media (max-width:800px) { .stats-compare-grid { grid-template-columns:1fr; } }
+.stat-counters { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
+.stat-box { text-align:center; padding:24px 12px; background:var(--bg); border-radius:12px; }
+.stat-num { font-size:32px; font-weight:900; color:var(--primary); }
+.stat-label { font-size:13px; color:var(--muted); margin-top:6px; }
+.compare-table { width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow:var(--shadow); }
+.compare-table th, .compare-table td { padding:14px 12px; text-align:center; font-size:13px; border-bottom:1px solid var(--border); }
+.compare-table th { background:var(--primary); color:#fff; }
+.compare-table td.win { color:var(--red); font-weight:900; }
+
+/* ── 고객 후기 ── */
+.review-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:20px; }
+.review-card { background:#fff; border-radius:12px; padding:22px; box-shadow:var(--shadow); }
+.review-stars { color:#F59E0B; font-size:14px; margin-bottom:10px; letter-spacing:2px; }
+.review-text { font-size:14px; line-height:1.7; color:var(--text); margin-bottom:16px; }
+.review-user { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--muted); }
+.review-avatar { width:32px; height:32px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:13px; flex-shrink:0; }
+
+/* ── 플로팅 주문 버튼 ── */
+.floating-cta {
+  position:fixed; right:24px; bottom:24px; z-index:200;
+  background:var(--red); color:#fff; padding:14px 22px; border-radius:50px;
+  font-weight:900; font-size:15px; box-shadow:0 8px 24px rgba(227,24,55,.4);
+  display:flex; align-items:center; gap:8px; transition:transform .2s;
+}
+.floating-cta:hover { transform:translateY(-3px); }
+@media (max-width:480px) { .floating-cta { right:16px; bottom:16px; padding:12px 18px; font-size:13px; } }
+
+/* ── 스크롤 리빌 ── */
+.reveal { opacity:0; transform:translateY(24px); transition:opacity .6s ease, transform .6s ease; }
+.reveal.visible { opacity:1; transform:translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ── 네비게이션 ── -->
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">🛒 <span>코스트코</span>대행</div>
+    <div class="nav-links">
+      <a href="index.html" class="active">홈</a>
+      <a href="products.html">이번 주 상품</a>
+      <a href="order.html" class="nav-cta btn">주문하기</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ── 히어로 ── -->
+<section class="hero">
+  <div class="hero-eyebrow">🎯 매주 월요일 새 상품 업데이트</div>
+  <h1>코스트코 회원권 없이도<br><em>인기 상품을 집에서</em></h1>
+  <p>주문 → 구매 → 배송까지 전부 대행해드립니다.<br>투명한 가격, 빠른 처리, 안심 배송.</p>
+  <div class="hero-btns">
+    <a href="products.html" class="btn btn-red btn-lg">이번 주 상품 보기 →</a>
+    <a href="#how" class="btn btn-outline btn-lg" style="color:#fff; border-color:rgba(255,255,255,.5)">이용 방법 보기</a>
+  </div>
+  <div class="hero-stats-mini">
+    <span>🧾 수수료 <strong>15%</strong> 투명 공개</span>
+    <span>📦 수요일 마감 → <strong>목요일 발송</strong></span>
+    <span>💬 카카오톡 <strong>1:1</strong> 운송장 안내</span>
+  </div>
+  <a href="#how" class="scroll-cue" aria-label="아래로 스크롤">⌄</a>
+</section>
+
+<!-- ── 신뢰 지표 ── -->
+<div class="trust-bar">
+  <div class="container">
+    <div class="trust-item">
+      <div class="trust-icon">📦</div>
+      <div>
+        <div class="trust-label">주문 후 배송</div>
+        <div class="trust-value">48시간 이내</div>
+      </div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-icon">💰</div>
+      <div>
+        <div class="trust-label">가격 정책</div>
+        <div class="trust-value">투명 공개</div>
+      </div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-icon">🔒</div>
+      <div>
+        <div class="trust-label">결제</div>
+        <div class="trust-value">선결제 안심</div>
+      </div>
+    </div>
+    <div class="trust-item">
+      <div class="trust-icon">🔄</div>
+      <div>
+        <div class="trust-label">상품 업데이트</div>
+        <div class="trust-value">매주 월요일</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── 마감 임박 알림바 ── -->
+<div class="urgency-bar">
+  ⏰ 이번 주 주문 마감까지 <span id="home-countdown">--</span> 남았습니다 · <a href="products.html">지금 확인하기 →</a>
+</div>
+
+<!-- ── 프로세스 ── -->
+<section class="section" id="how">
+  <div class="container">
+    <div class="section-title">이용 방법</div>
+    <div class="section-sub">4단계로 간단하게 코스트코 상품을 받아보세요</div>
+    <div class="process-grid">
+      <div class="process-card">
+        <div class="process-num">1</div>
+        <div class="process-icon">🛍️</div>
+        <h3>상품 선택</h3>
+        <p>매주 월요일 업데이트 되는 할인 상품 중 원하시는 것을 선택하세요</p>
+      </div>
+      <div class="process-card">
+        <div class="process-num">2</div>
+        <div class="process-icon">📝</div>
+        <h3>주문 & 결제</h3>
+        <p>주문서 작성 후 무통장입금으로 결제. 입금 확인 즉시 처리 시작</p>
+      </div>
+      <div class="process-card">
+        <div class="process-num">3</div>
+        <div class="process-icon">🏪</div>
+        <h3>코스트코 구매</h3>
+        <p>주문 마감 후 코스트코 매장에서 직접 구매 및 검수 진행</p>
+      </div>
+      <div class="process-card">
+        <div class="process-num">4</div>
+        <div class="process-icon">🚚</div>
+        <h3>택배 발송</h3>
+        <p>포장 완료 후 택배 발송. 운송장 번호는 카카오톡으로 안내드립니다</p>
+      </div>
+    </div>
+
+    <div class="alert alert-blue" style="margin-top:32px;">
+      ⏰ <strong>주문 마감:</strong> 매주 수요일 오후 3시 | <strong>발송:</strong> 목요일 오후 | <strong>도착:</strong> 수도권 금요일 / 지방 토~일
+    </div>
+  </div>
+</section>
+
+<!-- ── 왜 코스트코 대행인가 (팩트 + 비교) ── -->
+<section class="section" style="background:#fff;">
+  <div class="container">
+    <div class="section-title">왜 코스트코 대행일까요?</div>
+    <div class="section-sub">회원권 없이, 매장에 가지 않고, 투명한 가격으로</div>
+    <div class="stats-compare-grid">
+      <div class="stat-counters">
+        <div class="stat-box">
+          <div class="stat-num" id="stat-count">--</div>
+          <div class="stat-label">이번 주 할인 상품</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">15%</div>
+          <div class="stat-label">대행 수수료 (투명 공개)</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">0원</div>
+          <div class="stat-label">연회비 부담</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-num">48시간</div>
+          <div class="stat-label">입금 확인 후 발송</div>
+        </div>
+      </div>
+      <table class="compare-table">
+        <thead>
+          <tr><th>구분</th><th>코스트코 직접 방문</th><th>코스트코 대행</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>연회비</td><td>38,500원/년</td><td class="win">0원</td></tr>
+          <tr><td>이동 시간</td><td>왕복 1~2시간</td><td class="win">0분</td></tr>
+          <tr><td>주차·대기</td><td>주말 혼잡</td><td class="win">해당없음</td></tr>
+          <tr><td>결제 수단</td><td>카드 제한</td><td class="win">계좌이체 자유</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- ── 이번 주 상품 프리뷰 ── -->
+<section class="section" style="background:#fff; padding-top: 48px;">
+  <div class="container">
+    <div class="section-title">이번 주 인기 상품</div>
+    <div class="section-sub" id="week-label">불러오는 중...</div>
+    <div class="preview-grid" id="preview-grid">
+      <div style="text-align:center; padding:40px; color:var(--muted)">상품 로딩 중...</div>
+    </div>
+    <div style="text-align:center; margin-top:36px;">
+      <a href="products.html" class="btn btn-primary btn-lg">전체 상품 보기 →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ── 운영 원칙 ── -->
+<section class="section" style="background:var(--bg);">
+  <div class="container">
+    <div class="section-title">저희가 지키는 원칙</div>
+    <div class="section-sub">과장 없이, 이 세 가지는 반드시 지킵니다</div>
+    <div class="review-grid">
+      <div class="review-card">
+        <div style="font-size:28px;margin-bottom:10px">🧾</div>
+        <div style="font-weight:900;margin-bottom:8px">투명한 가격</div>
+        <div class="review-text">코스트코 판매가에 수수료 15%만 더한 가격입니다. 상품마다 코스트코 가격을 그대로 공개하니 직접 비교해보세요.</div>
+      </div>
+      <div class="review-card">
+        <div style="font-size:28px;margin-bottom:10px">📅</div>
+        <div style="font-weight:900;margin-bottom:8px">정해진 일정</div>
+        <div class="review-text">수요일 오후 3시 마감 → 목요일 매장 구매·당일 발송. 일정이 바뀌면 주문 전 미리 공지합니다.</div>
+      </div>
+      <div class="review-card">
+        <div style="font-size:28px;margin-bottom:10px">💬</div>
+        <div style="font-weight:900;margin-bottom:8px">끝까지 안내</div>
+        <div class="review-text">입금 확인, 구매 완료, 운송장 번호까지 단계마다 카카오톡으로 알려드립니다. 재고 소진 시엔 전액 환불됩니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── 주의사항 ── -->
+<section class="section">
+  <div class="container">
+    <div class="section-title">이용 안내</div>
+    <div class="section-sub">원활한 서비스를 위해 아래 내용을 확인해주세요</div>
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap:16px;">
+      <div class="alert alert-yellow">📌 <div><strong>재고 소진 시 취소</strong><br>코스트코 재고 상황에 따라 주문이 취소될 수 있습니다. 전액 환불 처리됩니다.</div></div>
+      <div class="alert alert-blue">❄️ <div><strong>냉장·냉동 제품 주의</strong><br>냉장·냉동 제품은 보냉 포장 추가비(1,000~3,000원)가 발생하며 당일 발송 원칙입니다.</div></div>
+      <div class="alert alert-green">✅ <div><strong>취소·환불 정책</strong><br>입금 전 취소는 자유롭게 가능하며, 입금 후 취소는 구매 전까지 가능합니다.</div></div>
+      <div class="alert alert-red">⚠️ <div><strong>가격 변동 안내</strong><br>코스트코 가격 인상 시 즉시 안내드리며, 차액 발생 시 협의 후 처리합니다.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FAQ ── -->
+<section class="section" style="background:#fff;">
+  <div class="container">
+    <div class="section-title">자주 묻는 질문</div>
+    <div class="section-sub">궁금한 점을 확인해보세요</div>
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q">코스트코 회원권이 없어도 주문할 수 있나요? <span class="faq-icon">+</span></div>
+        <div class="faq-a">네, 회원권이 없어도 이용하실 수 있습니다. 대행 서비스를 통해 코스트코 회원권 없이 인기 상품을 구매하실 수 있습니다.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">결제는 어떻게 하나요? <span class="faq-icon">+</span></div>
+        <div class="faq-a">현재 무통장입금(계좌이체)으로 운영 중입니다. 주문 완료 후 계좌번호와 입금 금액이 안내됩니다. 입금 확인 후 구매가 진행됩니다.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">택배비는 얼마인가요? <span class="faq-icon">+</span></div>
+        <div class="faq-a">택배비는 실비 기준 3,500~5,500원입니다. 주문 금액과 무게에 따라 달라지며, 주문서 작성 시 확인하실 수 있습니다.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">원하는 제품이 목록에 없어요. <span class="faq-icon">+</span></div>
+        <div class="faq-a">목록 외 제품도 별도 문의를 통해 대행 가능합니다. 카카오 채널로 문의해주시면 확인 후 안내드리겠습니다.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">상품이 파손되어 왔어요. <span class="faq-icon">+</span></div>
+        <div class="faq-a">수령 후 즉시 사진 촬영과 함께 카카오 채널로 접수해주세요. 택배사 파손 보험을 통해 처리해드립니다.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA 배너 ── -->
+<div class="cta-banner">
+  <h2>지금 바로 이번 주 상품을 확인하세요</h2>
+  <p>수요일 오후 3시 마감 · 목요일 발송 · 금요일 도착</p>
+  <a href="products.html" class="btn btn-lg" style="background:#fff; color:var(--red);">이번 주 상품 보기 →</a>
+</div>
+
+<!-- ── 푸터 ── -->
+<footer>
+  <strong>코스트코 대행 서비스</strong>
+  <div class="footer-links">
+    <a href="index.html">홈</a>
+    <a href="products.html">이번 주 상품</a>
+    <a href="order.html">주문하기</a>
+  </div>
+  <p>본 서비스는 코스트코와 직접적인 관계가 없는 개인 대행 서비스입니다.</p>
+  <p style="margin-top:8px;">카카오 채널 문의 | 운영시간: 평일 9:00~18:00</p>
+</footer>
+
+<a href="order.html" class="floating-cta">📝 바로 주문하기</a>
+
+<script>
+// 프리뷰 상품 로드
+fetch('data/products.json')
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('week-label').textContent = data.week + ' 업데이트';
+    document.getElementById('stat-count').textContent = data.products.length + '개';
+
+    // 마감 임박 알림바 카운트다운
+    const deadline = new Date(data.order_deadline);
+    function updateMiniCountdown() {
+      const el = document.getElementById('home-countdown');
+      if (!el) return;
+      const diff = deadline - Date.now();
+      if (diff <= 0) { el.textContent = '마감'; return; }
+      const d = Math.floor(diff / 86400000);
+      const h = Math.floor(diff % 86400000 / 3600000);
+      const m = Math.floor(diff % 3600000 / 60000);
+      el.textContent = d > 0 ? `${d}일 ${h}시간 ${m}분` : `${h}시간 ${m}분`;
+    }
+    updateMiniCountdown();
+    setInterval(updateMiniCountdown, 60000);
+
+    const grid = document.getElementById('preview-grid');
+    grid.innerHTML = data.products.slice(0, 3).map(p => `
+      <div class="preview-card">
+        <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/400x180/003DA5/FFFFFF?text=${encodeURIComponent(p.name)}'">
+        <div class="preview-card-body">
+          <span class="badge ${p.cold ? 'badge-cold' : 'badge-blue'}">${p.category}</span>
+          ${p.badge ? `<span class="badge badge-red" style="margin-left:4px">${p.badge}</span>` : ''}
+          <h3 style="margin-top:8px">${p.name}</h3>
+          <small style="color:var(--muted)">${p.unit}</small>
+          <div class="price-row">
+            <span class="sale-price">${p.sale_price.toLocaleString()}원</span>
+            <span class="margin-chip">대행가</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  });
+
+// FAQ 아코디언
+document.querySelectorAll('.faq-q').forEach(q => {
+  q.addEventListener('click', () => {
+    const item = q.parentElement;
+    const a = item.querySelector('.faq-a');
+    const isOpen = a.classList.contains('open');
+    document.querySelectorAll('.faq-a').forEach(el => el.classList.remove('open'));
+    document.querySelectorAll('.faq-item').forEach(el => el.classList.remove('active'));
+    if (!isOpen) { a.classList.add('open'); item.classList.add('active'); }
+  });
+});
+
+// 스크롤 리빌 애니메이션
+const revealTargets = document.querySelectorAll('.section');
+revealTargets.forEach(el => el.classList.add('reveal'));
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+      revealObserver.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.12 });
+revealTargets.forEach(el => revealObserver.observe(el));
+</script>
+</body>
+</html>

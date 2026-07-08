@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>주문 관리 | 코스트코 대행</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.admin-wrap { max-width: 1280px; margin: 0 auto; padding: 24px; }
+
+/* 로그인 게이트 */
+.login-gate { text-align:center; padding:100px 24px; }
+.login-gate h1 { font-size:24px; font-weight:900; margin-bottom:8px; }
+.login-gate p { color:var(--muted); margin-bottom:28px; }
+
+/* 상태 요약 */
+.stat-row { display:grid; grid-template-columns:repeat(auto-fit, minmax(140px,1fr)); gap:12px; margin-bottom:24px; }
+.stat-chip { background:#fff; border-radius:10px; padding:14px; text-align:center; box-shadow:var(--shadow); cursor:pointer; border:2px solid transparent; transition:all .15s; }
+.stat-chip.active { border-color:var(--primary); }
+.stat-chip .n { font-size:24px; font-weight:900; color:var(--primary); }
+.stat-chip .l { font-size:12px; color:var(--muted); }
+
+/* 주문 카드 */
+.order-card { background:#fff; border-radius:12px; box-shadow:var(--shadow); padding:18px 20px; margin-bottom:14px; }
+.order-head { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px; margin-bottom:10px; }
+.order-no { font-weight:900; font-size:16px; color:var(--primary); }
+.order-date { font-size:12px; color:var(--muted); }
+.order-body { display:grid; grid-template-columns:1fr 1fr; gap:8px 20px; font-size:14px; margin-bottom:12px; }
+@media(max-width:700px){ .order-body { grid-template-columns:1fr; } }
+.order-body b { color:var(--muted); font-weight:700; font-size:12px; display:block; }
+.order-items { background:var(--bg); border-radius:8px; padding:10px 14px; font-size:13px; margin-bottom:12px; }
+.order-total { font-weight:900; color:var(--red); }
+
+.status-badge { padding:4px 12px; border-radius:20px; font-size:12px; font-weight:700; }
+.st-입금대기 { background:#FEF3C7; color:#92400E; }
+.st-입금확인 { background:#DBEAFE; color:#1E40AF; }
+.st-구매완료 { background:#EDE9FE; color:#5B21B6; }
+.st-발송완료 { background:#D1FAE5; color:#065F46; }
+.st-취소 { background:#FEE2E2; color:#991B1B; }
+
+.order-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; border-top:1px solid var(--border); padding-top:12px; }
+.order-actions select, .order-actions input {
+  padding:8px 10px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-family:inherit;
+}
+.order-actions input.tracking { width:160px; }
+.mini-btn { padding:8px 14px; border-radius:8px; border:none; font-size:13px; font-weight:700; cursor:pointer; background:var(--primary); color:#fff; }
+.mini-btn.gray { background:#6B7280; }
+.mini-btn:hover { opacity:.88; }
+.empty-msg { text-align:center; color:var(--muted); padding:60px; }
+#user-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">🛒 <span>코스트코</span>대행 <span style="font-size:13px;color:#fff;opacity:.7;margin-left:6px">관리자</span></div>
+    <div class="nav-links">
+      <a href="index.html">사이트로 이동</a>
+    </div>
+  </div>
+</nav>
+
+<!-- 로그인 전 -->
+<div class="login-gate" id="login-gate">
+  <h1>🔐 주문 관리</h1>
+  <p>관리자 전용 페이지입니다. 구글 계정으로 로그인해주세요.</p>
+  <button class="btn btn-primary btn-lg" onclick="login()">구글 계정으로 로그인</button>
+</div>
+
+<!-- 로그인 후 -->
+<div class="admin-wrap" id="admin-panel" style="display:none">
+  <div id="user-bar">
+    <h1 style="font-size:22px;font-weight:900">📋 주문 관리</h1>
+    <div style="display:flex;align-items:center;gap:12px">
+      <span id="user-email" style="font-size:13px;color:var(--muted)"></span>
+      <button class="mini-btn gray" onclick="logout()">로그아웃</button>
+    </div>
+  </div>
+
+  <div class="stat-row" id="stat-row"></div>
+  <div id="order-list"><div class="empty-msg">주문 불러오는 중...</div></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyDSUUtoHiO3WtJ1IOiFfTPqLlCIG-_LfEI",
+  authDomain: "costco-proxy.firebaseapp.com",
+  projectId: "costco-proxy",
+  storageBucket: "costco-proxy.firebasestorage.app",
+  messagingSenderId: "145929393279",
+  appId: "1:145929393279:web:30f77a53a4f3fcaec79b4a"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+
+const STATUSES = ['입금대기', '입금확인', '구매완료', '발송완료', '취소'];
+const COURIERS = ['CJ대한통운', '우체국택배', '한진택배', '롯데택배', '로젠택배'];
+let orders = [];
+let filterStatus = '전체';
+let unsubscribe = null;
+
+function login() {
+  auth.signInWithPopup(new firebase.auth.GoogleAuthProvider())
+    .catch(err => alert('로그인 실패: ' + err.message));
+}
+function logout() { auth.signOut(); }
+
+auth.onAuthStateChanged(user => {
+  document.getElementById('login-gate').style.display = user ? 'none' : 'block';
+  document.getElementById('admin-panel').style.display = user ? 'block' : 'none';
+  if (user) {
+    document.getElementById('user-email').textContent = user.email;
+    subscribeOrders();
+  } else if (unsubscribe) {
+    unsubscribe();
+  }
+});
+
+function subscribeOrders() {
+  unsubscribe = db.collection('orders').orderBy('createdAt', 'desc').limit(300)
+    .onSnapshot(snap => {
+      orders = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      render();
+    }, err => {
+      document.getElementById('order-list').innerHTML =
+        `<div class="empty-msg">⚠️ 주문을 읽을 수 없습니다.<br>보안 규칙이 관리자 읽기를 허용하는지, 관리자 계정(${auth.currentUser?.email})으로 로그인했는지 확인해주세요.<br><small>${err.message}</small></div>`;
+    });
+}
+
+function fmtDate(ts) {
+  if (!ts || !ts.toDate) return '-';
+  const d = ts.toDate();
+  return `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function render() {
+  // 상태별 요약
+  const counts = { 전체: orders.length };
+  STATUSES.forEach(s => counts[s] = orders.filter(o => o.status === s).length);
+  document.getElementById('stat-row').innerHTML =
+    ['전체', ...STATUSES].map(s =>
+      `<div class="stat-chip ${filterStatus === s ? 'active' : ''}" onclick="setFilter('${s}')">
+        <div class="n">${counts[s]}</div><div class="l">${s}</div>
+      </div>`).join('');
+
+  const list = filterStatus === '전체' ? orders : orders.filter(o => o.status === filterStatus);
+  const wrap = document.getElementById('order-list');
+  if (!list.length) {
+    wrap.innerHTML = '<div class="empty-msg">해당하는 주문이 없습니다.</div>';
+    return;
+  }
+  wrap.innerHTML = list.map(o => `
+    <div class="order-card">
+      <div class="order-head">
+        <div>
+          <span class="order-no">${o.orderNo || o.id}</span>
+          <span class="status-badge st-${o.status || '입금대기'}" style="margin-left:8px">${o.status || '입금대기'}</span>
+          ${o.rollover ? '<span class="status-badge" style="margin-left:4px;background:#FFE4E6;color:#9F1239">⏭️ 다음 주 이월</span>' : ''}
+        </div>
+        <span class="order-date">${fmtDate(o.createdAt)}</span>
+      </div>
+      <div class="order-body">
+        <div><b>주문자 / 연락처</b>${esc(o.name)} · ${esc(o.phone)}</div>
+        <div><b>카카오톡</b>${esc(o.kakaoId) || '-'}</div>
+        <div><b>수령인</b>${esc(o.receiver) || esc(o.name)}</div>
+        <div><b>배송지</b>[${esc(o.zipcode)}] ${esc(o.address)} ${esc(o.addressDetail)}</div>
+        <div><b>배송 메모</b>${esc(o.deliveryMemo) || '-'}</div>
+        <div><b>입금 금액</b><span class="order-total">${(o.totalAmount || 0).toLocaleString()}원</span></div>
+      </div>
+      <div class="order-items">🛍️ ${esc(o.items)}</div>
+      <div class="order-actions">
+        <select id="st-${o.id}">
+          ${STATUSES.map(s => `<option ${o.status === s ? 'selected' : ''}>${s}</option>`).join('')}
+        </select>
+        <select id="courier-${o.id}">
+          ${COURIERS.map(c => `<option ${o.courier === c ? 'selected' : ''}>${c}</option>`).join('')}
+        </select>
+        <input class="tracking" id="tr-${o.id}" placeholder="운송장 번호" value="${esc(o.trackingNo) || ''}">
+        <button class="mini-btn" onclick="saveOrder('${o.id}')">💾 저장</button>
+        <button class="mini-btn gray" onclick="copyMsg('${o.id}')">📋 고객 안내문 복사</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+}
+
+function setFilter(s) { filterStatus = s; render(); }
+
+async function saveOrder(id) {
+  const status = document.getElementById('st-' + id).value;
+  const courier = document.getElementById('courier-' + id).value;
+  const trackingNo = document.getElementById('tr-' + id).value.trim();
+  try {
+    await db.collection('orders').doc(id).update({ status, courier, trackingNo });
+    alert('저장되었습니다.');
+  } catch (err) {
+    alert('저장 실패: ' + err.message);
+  }
+}
+
+function copyMsg(id) {
+  const o = orders.find(x => x.id === id);
+  if (!o) return;
+  const lines = [`[코스트코대행] ${o.name}님, 안녕하세요!`];
+  if (o.status === '발송완료' || o.trackingNo) {
+    lines.push(`주문하신 상품이 발송되었습니다. 🚚`);
+    lines.push(`· 주문번호: ${o.orderNo || o.id}`);
+    lines.push(`· 택배사: ${o.courier || 'CJ대한통운'}`);
+    lines.push(`· 운송장번호: ${o.trackingNo || '(입력 후 복사해주세요)'}`);
+    lines.push(`네이버에 "${o.courier || 'CJ대한통운'} 택배조회" 검색 후 운송장번호를 입력하시면 배송 조회가 가능합니다.`);
+  } else if (o.status === '입금확인' || o.status === '구매완료') {
+    lines.push(`입금이 확인되었습니다. 감사합니다! 🙏`);
+    lines.push(`· 주문번호: ${o.orderNo || o.id}`);
+    lines.push(`목요일 코스트코 구매 후 발송해드리며, 운송장 번호를 다시 안내드리겠습니다.`);
+  } else {
+    lines.push(`주문이 접수되었습니다.`);
+    lines.push(`· 주문번호: ${o.orderNo || o.id}`);
+    lines.push(`· 입금 금액: ${(o.totalAmount || 0).toLocaleString()}원`);
+    lines.push(`카카오뱅크 3333-00-0000000 (홍길동)으로 입금해주시면 처리가 시작됩니다.`);
+  }
+  navigator.clipboard.writeText(lines.join('\n'))
+    .then(() => alert('안내문이 복사되었습니다. 카카오톡에 붙여넣기 하세요.'));
+}
+</script>
+</body>
+</html>

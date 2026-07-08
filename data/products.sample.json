@@ -1,0 +1,87 @@
+{
+  "week": "2026년 7월 1주차",
+  "updated": "2026-07-01",
+  "order_deadline": "2026-07-03T15:00:00",
+  "pickup_day": "2026-07-04",
+  "notice": "이번 주 냉동 제품은 목요일 발송 기준으로 금·토 도착 예정입니다.",
+  "products": [
+    {
+      "id": 1,
+      "name": "커클랜드 오메가3 피쉬오일",
+      "category": "건강기능식품",
+      "costco_price": 29900,
+      "sale_price": 33800,
+      "unit": "400캡슐 1통",
+      "max_qty": 3,
+      "badge": "인기",
+      "cold": false,
+      "description": "코스트코 베스트셀러. 고함량 오메가3 400캡슐 대용량으로 약 13개월 분량입니다.",
+      "image": "https://via.placeholder.com/400x300/003DA5/FFFFFF?text=Omega3"
+    },
+    {
+      "id": 2,
+      "name": "커클랜드 너트 믹스",
+      "category": "간식·건과",
+      "costco_price": 18900,
+      "sale_price": 21800,
+      "unit": "1.13kg",
+      "max_qty": 2,
+      "badge": "이번 주 특가",
+      "cold": false,
+      "description": "아몬드·캐슈넛·피칸·마카다미아·피스타치오 5종 믹스. 무염 무설탕.",
+      "image": "https://via.placeholder.com/400x300/003DA5/FFFFFF?text=NutMix"
+    },
+    {
+      "id": 3,
+      "name": "풀드포크 바베큐",
+      "category": "냉장·냉동",
+      "costco_price": 14900,
+      "sale_price": 17500,
+      "unit": "1.36kg",
+      "max_qty": 2,
+      "badge": "냉장",
+      "cold": true,
+      "description": "전자레인지 5분이면 완성. 바베큐 소스 숙성 돼지고기. 냉장 보냉 포장 발송.",
+      "image": "https://via.placeholder.com/400x300/E31837/FFFFFF?text=PulledPork"
+    },
+    {
+      "id": 4,
+      "name": "커클랜드 물티슈 900매",
+      "category": "생활용품",
+      "costco_price": 13500,
+      "sale_price": 15500,
+      "unit": "100매 × 9팩",
+      "max_qty": 3,
+      "badge": "",
+      "cold": false,
+      "description": "커클랜드 시그니처 물티슈. 두껍고 튼튼한 소재. 9팩 묶음.",
+      "image": "https://via.placeholder.com/400x300/003DA5/FFFFFF?text=Wipes"
+    },
+    {
+      "id": 5,
+      "name": "미니 크루아상 24개",
+      "category": "베이커리",
+      "costco_price": 7900,
+      "sale_price": 9500,
+      "unit": "24개입",
+      "max_qty": 3,
+      "badge": "SNS 인기",
+      "cold": false,
+      "description": "코스트코 베이커리 인기 1위. 버터 풍미 가득한 미니 크루아상.",
+      "image": "https://via.placeholder.com/400x300/003DA5/FFFFFF?text=Croissant"
+    },
+    {
+      "id": 6,
+      "name": "커클랜드 종합 비타민 (성인용)",
+      "category": "건강기능식품",
+      "costco_price": 22900,
+      "sale_price": 25900,
+      "unit": "500정",
+      "max_qty": 2,
+      "badge": "",
+      "cold": false,
+      "description": "하루 1정. 비타민 A·B·C·D·E·K 및 미네랄 종합 함유. 약 1년 6개월치.",
+      "image": "https://via.placeholder.com/400x300/003DA5/FFFFFF?text=Vitamins"
+    }
+  ]
+}

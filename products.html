@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이번 주 할인 상품 | 코스트코 대행</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* ── 필터 탭 ── */
+.filter-bar { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:28px; }
+.filter-btn {
+  padding:8px 18px; border-radius:20px; border:1.5px solid var(--border);
+  background:#fff; font-size:13px; font-weight:700; cursor:pointer;
+  transition:all .15s; color:var(--muted);
+}
+.filter-btn:hover, .filter-btn.active {
+  background:var(--primary); color:#fff; border-color:var(--primary);
+}
+
+/* ── 상품 그리드 ── */
+.product-grid {
+  display:grid; grid-template-columns:repeat(auto-fill, minmax(280px,1fr)); gap:20px;
+}
+.product-card {
+  background:#fff; border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,.07);
+  overflow:hidden; transition:transform .2s, box-shadow .2s; display:flex; flex-direction:column;
+}
+.product-card:hover { transform:translateY(-4px); box-shadow:0 10px 28px rgba(0,0,0,.14); }
+
+.product-img { position:relative; height:200px; overflow:hidden; background:#fff; border-bottom:1px solid var(--border); }
+.product-img img { width:100%; height:100%; object-fit:contain; padding:14px; transition:transform .3s; }
+.product-card:hover .product-img img { transform:scale(1.04); }
+.product-badges { position:absolute; top:10px; left:10px; display:flex; gap:6px; flex-wrap:wrap; }
+.cold-badge {
+  position:absolute; top:10px; right:10px;
+  background:#7C3AED; color:#fff; font-size:11px; font-weight:700;
+  padding:3px 8px; border-radius:4px;
+}
+
+.product-body { padding:16px 18px; flex:1; display:flex; flex-direction:column; }
+.product-cat { font-size:12px; color:var(--muted); margin-bottom:4px; }
+.product-name { font-size:16px; font-weight:700; margin-bottom:4px; line-height:1.4; }
+.product-unit { font-size:12px; color:var(--muted); margin-bottom:10px; }
+.product-desc { font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:14px; flex:1; }
+
+.product-price-row { display:flex; align-items:flex-end; gap:8px; margin-bottom:14px; }
+.product-sale-price { font-size:22px; font-weight:900; color:var(--red); }
+.product-info { font-size:11px; color:var(--muted); }
+.product-info small { display:block; }
+
+.product-btn {
+  width:100%; padding:12px; border-radius:8px;
+  background:var(--primary); color:#fff; font-weight:700; font-size:15px;
+  border:none; cursor:pointer; transition:all .15s;
+}
+.product-btn:hover { background:var(--primary-dark); }
+
+/* ── 모달 ── */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.55);
+  display:flex; align-items:center; justify-content:center;
+  z-index:999; opacity:0; visibility:hidden; transition:all .2s;
+}
+.modal-overlay.open { opacity:1; visibility:visible; }
+.modal {
+  background:#fff; border-radius:16px; width:92%; max-width:520px;
+  max-height:90vh; overflow-y:auto;
+  transform:translateY(20px); transition:transform .2s;
+  box-shadow:0 20px 60px rgba(0,0,0,.3);
+}
+.modal-overlay.open .modal { transform:translateY(0); }
+.modal-img { width:100%; height:220px; object-fit:contain; background:#fff; padding:14px; border-bottom:1px solid var(--border); }
+.modal-body { padding:24px; }
+.modal-name { font-size:20px; font-weight:900; margin:8px 0; }
+.modal-close {
+  position:absolute; top:16px; right:16px;
+  background:rgba(0,0,0,.5); color:#fff;
+  border:none; border-radius:50%; width:36px; height:36px;
+  font-size:20px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+
+/* ── 마감 카운트다운 ── */
+.deadline-section { margin-bottom:32px; }
+
+/* ── 페이지네이션 ── */
+.pagination { display:flex; justify-content:center; align-items:center; gap:6px; margin-top:36px; flex-wrap:wrap; }
+.page-btn {
+  min-width:38px; height:38px; padding:0 10px; border-radius:8px;
+  border:1.5px solid var(--border); background:#fff;
+  font-size:14px; font-weight:700; color:var(--muted); cursor:pointer;
+  display:flex; align-items:center; justify-content:center; transition:all .15s;
+}
+.page-btn:hover:not(:disabled) { border-color:var(--primary); color:var(--primary); }
+.page-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+.page-btn:disabled { opacity:.4; cursor:default; }
+.page-info { font-size:13px; color:var(--muted); text-align:center; margin-top:10px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">🛒 <span>코스트코</span>대행</div>
+    <div class="nav-links">
+      <a href="index.html">홈</a>
+      <a href="products.html" class="active">이번 주 상품</a>
+      <a href="order.html" class="nav-cta btn">주문하기</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <h1>이번 주 할인 상품</h1>
+  <p id="week-title">로딩 중...</p>
+</div>
+
+<section class="section">
+  <div class="container">
+
+    <!-- 마감 카운트다운 -->
+    <div class="deadline-section">
+      <div class="countdown-bar">
+        <span style="font-size:22px">⏰</span>
+        <div>
+          <div style="font-size:13px;margin-bottom:2px">주문 마감까지</div>
+          <div id="countdown-timer">00:00:00</div>
+        </div>
+        <div style="margin-left:auto; font-size:13px; color:var(--muted)">
+          마감 후 주문은 다음 주로 이월됩니다
+        </div>
+      </div>
+      <div class="alert alert-blue" style="margin-top:12px;" id="notice-box"></div>
+    </div>
+
+    <!-- 카테고리 필터 -->
+    <div class="filter-bar" id="filter-bar">
+      <button class="filter-btn active" data-cat="전체">전체</button>
+    </div>
+
+    <!-- 상품 그리드 -->
+    <div class="product-grid" id="product-grid">
+      <div style="grid-column:1/-1; text-align:center; padding:60px; color:var(--muted)">
+        상품 불러오는 중...
+      </div>
+    </div>
+
+    <!-- 페이지네이션 -->
+    <div class="pagination" id="pagination"></div>
+    <div class="page-info" id="page-info"></div>
+
+  </div>
+</section>
+
+<!-- 모달 -->
+<div class="modal-overlay" id="modal">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" id="modal-close">✕</button>
+    <img id="modal-img" src="" alt="" class="modal-img">
+    <div class="modal-body">
+      <div id="modal-badges"></div>
+      <div class="modal-name" id="modal-name"></div>
+      <div style="color:var(--muted);font-size:13px;margin-bottom:14px" id="modal-unit"></div>
+      <p style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px" id="modal-desc"></p>
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px">
+        <span style="font-size:26px;font-weight:900;color:var(--red)" id="modal-price"></span>
+        <span style="font-size:12px;color:var(--muted)" id="modal-info"></span>
+      </div>
+      <div class="alert alert-yellow" style="margin-bottom:16px;font-size:13px" id="modal-cold-notice" hidden>
+        ❄️ 냉장·냉동 제품으로 보냉 포장비(1,000~3,000원)가 별도 추가됩니다.
+      </div>
+      <a href="order.html" class="btn btn-red btn-full btn-lg" id="modal-order-btn">이 상품 주문하기 →</a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <strong>코스트코 대행 서비스</strong>
+  <div class="footer-links">
+    <a href="index.html">홈</a>
+    <a href="products.html">이번 주 상품</a>
+    <a href="order.html">주문하기</a>
+  </div>
+  <p>카카오 채널 문의 | 운영시간: 평일 9:00~18:00</p>
+</footer>
+
+<script>
+let allProducts = [];
+let currentCat = '전체';
+let currentPage = 1;
+const PAGE_SIZE = 12;
+
+fetch('data/products.json')
+  .then(r => r.json())
+  .then(data => {
+    allProducts = data.products;
+    document.getElementById('week-title').textContent = data.week;
+    document.getElementById('notice-box').innerHTML = '📢 ' + (data.notice || '');
+
+    // 카운트다운
+    const deadline = new Date(data.order_deadline);
+    function tick() {
+      const diff = deadline - Date.now();
+      if (diff <= 0) { document.getElementById('countdown-timer').textContent = '마감'; return; }
+      const h = String(Math.floor(diff/3600000)).padStart(2,'0');
+      const m = String(Math.floor(diff%3600000/60000)).padStart(2,'0');
+      const s = String(Math.floor(diff%60000/1000)).padStart(2,'0');
+      document.getElementById('countdown-timer').textContent = `${h}:${m}:${s}`;
+    }
+    tick(); setInterval(tick, 1000);
+
+    // 카테고리 버튼 생성
+    const cats = ['전체', ...new Set(data.products.map(p => p.category))];
+    const bar = document.getElementById('filter-bar');
+    bar.innerHTML = cats.map(c =>
+      `<button class="filter-btn ${c==='전체'?'active':''}" data-cat="${c}">${c}</button>`
+    ).join('');
+    bar.querySelectorAll('.filter-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        bar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentCat = btn.dataset.cat;
+        currentPage = 1;
+        renderProducts();
+      });
+    });
+
+    renderProducts();
+  });
+
+function renderProducts() {
+  const filtered = currentCat === '전체' ? allProducts : allProducts.filter(p => p.category === currentCat);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  if (currentPage > totalPages) currentPage = totalPages;
+  const pageItems = filtered.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const grid = document.getElementById('product-grid');
+  grid.innerHTML = pageItems.map(p => `
+    <div class="product-card">
+      <div class="product-img">
+        <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/400x200/003DA5/FFFFFF?text=${encodeURIComponent(p.name)}'">
+        <div class="product-badges">
+          ${p.badge ? `<span class="badge badge-red">${p.badge}</span>` : ''}
+        </div>
+        ${p.cold ? '<span class="cold-badge">❄️ 냉장</span>' : ''}
+      </div>
+      <div class="product-body">
+        <div class="product-cat">${p.category}</div>
+        <div class="product-name">${p.name}</div>
+        <div class="product-unit">📦 ${p.unit}</div>
+        <div class="product-desc">${p.description}</div>
+        <div class="product-price-row">
+          <span class="product-sale-price">${p.sale_price.toLocaleString()}원</span>
+          <div class="product-info">
+            <small>최대 ${p.max_qty}개 주문 가능</small>
+            <small>+ 택배비 별도</small>
+          </div>
+        </div>
+        <button class="product-btn" onclick="openModal(${p.id})">상세보기 / 주문</button>
+      </div>
+    </div>
+  `).join('');
+
+  if (!pageItems.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:60px; color:var(--muted)">해당 카테고리에 상품이 없습니다.</div>';
+  }
+  renderPagination(totalPages, filtered.length);
+}
+
+function renderPagination(totalPages, totalItems) {
+  const wrap = document.getElementById('pagination');
+  const info = document.getElementById('page-info');
+  if (totalPages <= 1) {
+    wrap.innerHTML = '';
+    info.textContent = totalItems ? `전체 ${totalItems}개 상품` : '';
+    return;
+  }
+  // 현재 페이지 주변 최대 5개의 페이지 번호만 노출
+  let start = Math.max(1, currentPage - 2);
+  let end = Math.min(totalPages, start + 4);
+  start = Math.max(1, end - 4);
+
+  let html = `<button class="page-btn" onclick="goPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>‹</button>`;
+  if (start > 1) html += `<button class="page-btn" onclick="goPage(1)">1</button>` + (start > 2 ? `<span style="color:var(--muted)">…</span>` : '');
+  for (let i = start; i <= end; i++) {
+    html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="goPage(${i})">${i}</button>`;
+  }
+  if (end < totalPages) html += (end < totalPages - 1 ? `<span style="color:var(--muted)">…</span>` : '') + `<button class="page-btn" onclick="goPage(${totalPages})">${totalPages}</button>`;
+  html += `<button class="page-btn" onclick="goPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>›</button>`;
+  wrap.innerHTML = html;
+  info.textContent = `전체 ${totalItems}개 상품 · ${currentPage} / ${totalPages} 페이지`;
+}
+
+function goPage(page) {
+  currentPage = page;
+  renderProducts();
+  document.getElementById('filter-bar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function openModal(id) {
+  const p = allProducts.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('modal-img').src = p.image;
+  document.getElementById('modal-badges').innerHTML =
+    `<span class="badge badge-blue">${p.category}</span> ${p.badge ? `<span class="badge badge-red" style="margin-left:4px">${p.badge}</span>` : ''}`;
+  document.getElementById('modal-name').textContent = p.name;
+  document.getElementById('modal-unit').textContent = '📦 ' + p.unit + ' | 최대 ' + p.max_qty + '개';
+  document.getElementById('modal-desc').textContent = p.description;
+  document.getElementById('modal-price').textContent = p.sale_price.toLocaleString() + '원';
+  document.getElementById('modal-info').innerHTML = '택배비 별도<br>최대 ' + p.max_qty + '개 주문 가능';
+  document.getElementById('modal-cold-notice').hidden = !p.cold;
+  document.getElementById('modal-order-btn').href = `order.html?id=${p.id}&name=${encodeURIComponent(p.name)}&price=${p.sale_price}`;
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+document.getElementById('modal-close').addEventListener('click', closeModal);
+document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+</script>
+</body>
+</html>

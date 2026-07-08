@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주문하기 | 코스트코 대행</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.order-layout { display:grid; grid-template-columns:1fr 380px; gap:28px; align-items:start; }
+@media(max-width:900px) { .order-layout { grid-template-columns:1fr; } }
+
+.order-form-card { background:#fff; border-radius:14px; padding:28px; box-shadow:var(--shadow); }
+.order-summary-card { background:#fff; border-radius:14px; padding:24px; box-shadow:var(--shadow); position:sticky; top:80px; }
+
+/* ── 상품 추가 영역 ── */
+.item-row {
+  display:grid; grid-template-columns:1fr auto auto;
+  gap:10px; align-items:center; padding:14px;
+  border:1.5px solid var(--border); border-radius:10px; margin-bottom:10px;
+}
+.item-row select { padding:10px; border-radius:8px; border:1.5px solid var(--border); font-size:14px; font-family:inherit; }
+.item-row input[type=number] { width:80px; padding:10px; border-radius:8px; border:1.5px solid var(--border); font-size:14px; text-align:center; }
+.item-remove { background:none; border:none; color:var(--red); font-size:22px; cursor:pointer; padding:4px; }
+.add-item-btn {
+  display:flex; align-items:center; gap:6px;
+  background:none; border:1.5px dashed var(--primary); color:var(--primary);
+  padding:10px 16px; border-radius:8px; font-size:14px; font-weight:700;
+  cursor:pointer; width:100%; justify-content:center; transition:all .15s;
+}
+.add-item-btn:hover { background:var(--primary); color:#fff; }
+
+/* ── 결제 안내 ── */
+.payment-box {
+  background:linear-gradient(135deg,#F0F4FF,#EFF6FF);
+  border:2px solid var(--primary); border-radius:12px; padding:20px;
+}
+.account-info { background:#fff; border-radius:8px; padding:14px; margin-top:12px; }
+.account-row { display:flex; justify-content:space-between; align-items:center; padding:6px 0; font-size:14px; }
+.account-row strong { color:var(--primary); }
+.copy-btn { background:var(--primary); color:#fff; border:none; padding:4px 10px; border-radius:4px; font-size:12px; cursor:pointer; }
+
+/* ── 금액 요약 ── */
+.summary-row { display:flex; justify-content:space-between; padding:8px 0; font-size:14px; border-bottom:1px solid var(--border); }
+.summary-total { display:flex; justify-content:space-between; padding:14px 0 0; font-size:18px; font-weight:900; color:var(--red); }
+
+/* ── 스텝 헤더 ── */
+.step-header { display:flex; align-items:center; gap:12px; margin-bottom:20px; padding-bottom:16px; border-bottom:2px solid var(--bg); }
+.step-num { background:var(--primary); color:#fff; width:32px; height:32px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:15px; flex-shrink:0; }
+.step-header h2 { font-size:18px; font-weight:900; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">🛒 <span>코스트코</span>대행</div>
+    <div class="nav-links">
+      <a href="index.html">홈</a>
+      <a href="products.html">이번 주 상품</a>
+      <a href="order.html" class="nav-cta btn active">주문하기</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page-header">
+  <h1>주문하기</h1>
+  <p>주문 정보를 입력해주세요 · 입금 확인 후 구매 진행됩니다</p>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="alert alert-yellow" style="margin-bottom:24px" id="deadline-notice">
+      ⏰ <strong>주문 마감:</strong> 매주 수요일 오후 3시 | 마감 이후 주문은 다음 주 처리됩니다.
+    </div>
+    <div class="alert alert-red" style="margin-bottom:24px; display:none" id="rollover-notice">
+      🚨 <div><strong>이번 주 주문이 마감되었습니다.</strong><br>
+      지금 주문하시면 <strong>다음 주 일정(구매·발송)으로 처리</strong>되며, 코스트코 사정에 따라
+      상품 가격·재고가 변동될 수 있습니다. 변동 시 개별 안내 후 진행/환불을 선택하실 수 있습니다.</div>
+    </div>
+
+    <!-- FormSubmit 사용: 이메일 주소를 본인 이메일로 변경하세요 -->
+    <form id="order-form" action="https://formsubmit.co/miracleinc12@gmail.com" method="POST">
+      <!-- FormSubmit 설정 -->
+      <input type="hidden" name="_subject" value="[코스트코대행] 새 주문이 들어왔습니다!">
+      <input type="hidden" name="_next" id="hidden-next" value="">
+      <input type="hidden" name="_captcha" value="false">
+      <input type="hidden" name="_template" value="table">
+      <input type="hidden" name="주문상품" id="hidden-items" value="">
+      <input type="hidden" name="주문번호" id="hidden-orderno" value="">
+      <input type="hidden" name="처리주차" id="hidden-week" value="이번 주">
+
+      <div class="order-layout">
+        <!-- 왼쪽: 폼 -->
+        <div>
+          <!-- STEP 1: 상품 선택 -->
+          <div class="order-form-card" style="margin-bottom:20px">
+            <div class="step-header">
+              <div class="step-num">1</div>
+              <div>
+                <h2>주문 상품 선택</h2>
+                <p style="font-size:13px;color:var(--muted);margin-top:2px">여러 상품을 함께 주문하실 수 있습니다</p>
+              </div>
+            </div>
+            <div id="items-container"></div>
+            <button type="button" class="add-item-btn" id="add-item">
+              + 상품 추가
+            </button>
+          </div>
+
+          <!-- STEP 2: 주문자 정보 -->
+          <div class="order-form-card" style="margin-bottom:20px">
+            <div class="step-header">
+              <div class="step-num">2</div>
+              <h2>주문자 정보</h2>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>이름 <span class="required">*</span></label>
+                <input type="text" name="이름" placeholder="홍길동" required>
+              </div>
+              <div class="form-group">
+                <label>연락처 <span class="required">*</span></label>
+                <input type="tel" name="연락처" placeholder="010-0000-0000" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>카카오톡 아이디 <span style="font-size:12px;color:var(--muted)">(운송장 발송용)</span></label>
+              <input type="text" name="카카오ID" placeholder="카카오톡 아이디를 입력해주세요">
+            </div>
+          </div>
+
+          <!-- STEP 3: 배송지 -->
+          <div class="order-form-card" style="margin-bottom:20px">
+            <div class="step-header">
+              <div class="step-num">3</div>
+              <h2>배송지 정보</h2>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>수령인 <span class="required">*</span></label>
+                <input type="text" name="수령인" placeholder="수령인 이름" required>
+              </div>
+              <div class="form-group">
+                <label>우편번호 <span class="required">*</span></label>
+                <input type="text" name="우편번호" placeholder="12345" required>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>주소 <span class="required">*</span></label>
+              <input type="text" name="주소" placeholder="도로명 주소" required>
+            </div>
+            <div class="form-group">
+              <label>상세 주소</label>
+              <input type="text" name="상세주소" placeholder="아파트 동/호수, 층수 등">
+            </div>
+            <div class="form-group">
+              <label>배송 메모</label>
+              <input type="text" name="배송메모" placeholder="예) 경비실에 맡겨주세요">
+            </div>
+          </div>
+
+          <!-- STEP 4: 결제 -->
+          <div class="order-form-card">
+            <div class="step-header">
+              <div class="step-num">4</div>
+              <h2>결제 방법</h2>
+            </div>
+            <div class="payment-box">
+              <p style="font-weight:700;color:var(--primary);margin-bottom:4px">💳 무통장 입금 (계좌이체)</p>
+              <p style="font-size:13px;color:var(--muted)">주문 완료 후 24시간 이내 입금하시면 확인 후 즉시 처리됩니다.</p>
+              <div class="account-info">
+                <div class="account-row">
+                  <span>은행</span>
+                  <strong>카카오뱅크</strong>
+                </div>
+                <div class="account-row">
+                  <span>계좌번호</span>
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <strong id="account-num">3333-00-0000000</strong>
+                    <button type="button" class="copy-btn" onclick="copyAccount()">복사</button>
+                  </div>
+                </div>
+                <div class="account-row">
+                  <span>예금주</span>
+                  <strong>홍길동</strong>
+                </div>
+              </div>
+              <div class="alert alert-yellow" style="margin-top:12px;font-size:13px">
+                ⚠️ 입금자명을 <strong>주문자 이름</strong>으로 해주세요. 다를 경우 확인이 지연될 수 있습니다.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 오른쪽: 주문 요약 -->
+        <div class="order-summary-card">
+          <h3 style="font-size:17px;font-weight:900;margin-bottom:16px">📋 주문 요약</h3>
+          <div id="summary-items">
+            <p style="color:var(--muted);font-size:14px">상품을 선택해주세요</p>
+          </div>
+          <div style="margin-top:16px">
+            <div class="summary-row">
+              <span>상품 금액</span>
+              <span id="sum-products">0원</span>
+            </div>
+            <div class="summary-row">
+              <span>택배비</span>
+              <span id="sum-delivery">별도 청구</span>
+            </div>
+            <div class="summary-total">
+              <span>입금 금액</span>
+              <span id="sum-total">0원</span>
+            </div>
+          </div>
+          <p style="font-size:11px;color:var(--muted);margin-top:8px">※ 택배비는 상품 수령 시 확정 안내</p>
+
+          <button type="submit" class="btn btn-red btn-full btn-lg" style="margin-top:24px">
+            주문 완료하기 →
+          </button>
+          <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:12px">
+            주문 완료 후 계좌로 입금해주세요<br>입금 확인 후 구매 진행됩니다
+          </p>
+        </div>
+      </div>
+    </form>
+  </div>
+</section>
+
+<footer>
+  <strong>코스트코 대행 서비스</strong>
+  <div class="footer-links">
+    <a href="index.html">홈</a>
+    <a href="products.html">이번 주 상품</a>
+    <a href="order.html">주문하기</a>
+  </div>
+  <p>카카오 채널 문의 | 운영시간: 평일 9:00~18:00</p>
+</footer>
+
+<!-- Firebase (주문 DB 저장) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+// ═══════════════════════════════════════════════════════
+// Firebase 설정 — FIREBASE_설정법.txt 참고해서 아래 값을 교체하세요
+// 값을 교체하기 전까지는 DB 저장 없이 이메일 알림만 작동합니다
+// ═══════════════════════════════════════════════════════
+const firebaseConfig = {
+  apiKey: "AIzaSyDSUUtoHiO3WtJ1IOiFfTPqLlCIG-_LfEI",
+  authDomain: "costco-proxy.firebaseapp.com",
+  projectId: "costco-proxy",
+  storageBucket: "costco-proxy.firebasestorage.app",
+  messagingSenderId: "145929393279",
+  appId: "1:145929393279:web:30f77a53a4f3fcaec79b4a"
+};
+
+let db = null;
+if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+  firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+}
+
+function makeOrderNo() {
+  const d = new Date();
+  const ymd = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+  const rand = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `${ymd}-${rand}`;
+}
+
+async function saveOrderToDB(orderNo) {
+  if (!db) return false;
+  const form = document.getElementById('order-form');
+  const get = name => (form.elements[name]?.value || '').trim();
+  const totalText = document.getElementById('sum-total').textContent;
+  const order = {
+    orderNo,
+    items: document.getElementById('hidden-items').value,
+    totalAmount: parseInt(totalText.replace(/[^0-9]/g, '')) || 0,
+    name: get('이름'),
+    phone: get('연락처'),
+    kakaoId: get('카카오ID'),
+    receiver: get('수령인'),
+    zipcode: get('우편번호'),
+    address: get('주소'),
+    addressDetail: get('상세주소'),
+    deliveryMemo: get('배송메모'),
+    status: '입금대기',
+    rollover: (typeof isRollover !== 'undefined' && isRollover), // 마감 후 주문 = 다음 주 이월
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  // 5초 안에 저장 안 되면 포기하고 이메일 제출로 진행 (주문 유실 방지)
+  await Promise.race([
+    db.collection('orders').doc(orderNo).set(order),
+    new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 5000))
+  ]);
+  return true;
+}
+</script>
+<script>
+let products = [];
+let itemCount = 0;
+
+// 완료 페이지 리다이렉트 주소 — FormSubmit은 전체 URL을 요구 (로컬/배포 자동 대응)
+document.getElementById('hidden-next').value =
+  location.origin + location.pathname.replace(/order\.html$/, 'complete.html');
+
+// URL 파라미터에서 상품 정보 가져오기
+const params = new URLSearchParams(location.search);
+const presetId = params.get('id');
+
+let isRollover = false; // 마감 지난 후의 주문 = 다음 주 이월
+
+fetch('data/products.json')
+  .then(r => r.json())
+  .then(data => {
+    products = data.products;
+    isRollover = new Date(data.order_deadline) <= new Date();
+    if (isRollover) {
+      document.getElementById('deadline-notice').style.display = 'none';
+      document.getElementById('rollover-notice').style.display = 'flex';
+      document.getElementById('hidden-week').value = '다음 주 이월';
+    }
+    addItem(presetId ? parseInt(presetId) : null);
+  });
+
+function addItem(presetId) {
+  itemCount++;
+  const idx = itemCount;
+  const container = document.getElementById('items-container');
+  const div = document.createElement('div');
+  div.className = 'item-row';
+  div.id = 'item-' + idx;
+  div.innerHTML = `
+    <select onchange="updateSummary()" id="select-${idx}">
+      <option value="">-- 상품 선택 --</option>
+      ${products.map(p => `<option value="${p.id}" data-price="${p.sale_price}" data-name="${p.name}" data-max="${p.max_qty}" ${p.id == presetId ? 'selected' : ''}>${p.name} — ${p.sale_price.toLocaleString()}원</option>`).join('')}
+    </select>
+    <input type="number" min="1" max="3" value="1" id="qty-${idx}" onchange="updateSummary()">
+    <button type="button" class="item-remove" onclick="removeItem(${idx})">✕</button>
+  `;
+  container.appendChild(div);
+  updateSummary();
+}
+
+function removeItem(idx) {
+  const el = document.getElementById('item-' + idx);
+  if (el) el.remove();
+  updateSummary();
+}
+
+function updateSummary() {
+  let total = 0;
+  const summaryLines = [];
+  const itemTexts = [];
+
+  document.querySelectorAll('[id^="select-"]').forEach(sel => {
+    const opt = sel.options[sel.selectedIndex];
+    if (!opt || !opt.value) return;
+    const idx = sel.id.replace('select-', '');
+    const qtyEl = document.getElementById('qty-' + idx);
+    const qty = parseInt(qtyEl?.value || 1);
+    const max = parseInt(opt.dataset.max || 3);
+    if (qty > max) qtyEl.value = max;
+    const price = parseInt(opt.dataset.price);
+    const name = opt.dataset.name;
+    const subtotal = price * Math.min(qty, max);
+    total += subtotal;
+    summaryLines.push(`<div class="summary-row"><span>${name} × ${Math.min(qty,max)}</span><span>${subtotal.toLocaleString()}원</span></div>`);
+    itemTexts.push(`${name} × ${Math.min(qty,max)}개 (${subtotal.toLocaleString()}원)`);
+  });
+
+  document.getElementById('summary-items').innerHTML = summaryLines.length
+    ? summaryLines.join('') : '<p style="color:var(--muted);font-size:14px">상품을 선택해주세요</p>';
+  document.getElementById('sum-products').textContent = total.toLocaleString() + '원';
+  document.getElementById('sum-total').textContent = total.toLocaleString() + '원';
+  document.getElementById('hidden-items').value = itemTexts.join(' | ');
+}
+
+document.getElementById('add-item').addEventListener('click', () => addItem(null));
+
+// ── 재구매 고객 자동 입력 ──
+// 주문 완료 시 배송 정보를 이 브라우저에만 저장했다가 다음 방문 때 자동으로 채움
+const SAVED_FIELDS = ['이름', '연락처', '카카오ID', '수령인', '우편번호', '주소', '상세주소', '배송메모'];
+
+function restoreCustomerInfo() {
+  let saved;
+  try { saved = JSON.parse(localStorage.getItem('customerInfo')); } catch { return; }
+  if (!saved) return;
+  const form = document.getElementById('order-form');
+  SAVED_FIELDS.forEach(f => {
+    if (saved[f] && form.elements[f] && !form.elements[f].value) form.elements[f].value = saved[f];
+  });
+  // 자동 입력 안내 배너
+  const banner = document.createElement('div');
+  banner.className = 'alert alert-green';
+  banner.style.marginBottom = '24px';
+  banner.innerHTML = `✅ <div>이전 주문의 배송 정보를 자동으로 입력했습니다.
+    <button type="button" id="clear-saved" style="background:none;border:none;color:var(--primary);
+    font-weight:700;cursor:pointer;text-decoration:underline;font-size:13px;margin-left:6px">지우고 새로 입력</button></div>`;
+  form.parentElement.insertBefore(banner, form);
+  document.getElementById('clear-saved').addEventListener('click', () => {
+    localStorage.removeItem('customerInfo');
+    SAVED_FIELDS.forEach(f => { if (form.elements[f]) form.elements[f].value = ''; });
+    banner.remove();
+  });
+}
+restoreCustomerInfo();
+
+function saveCustomerInfo() {
+  const form = document.getElementById('order-form');
+  const saved = {};
+  SAVED_FIELDS.forEach(f => { if (form.elements[f]) saved[f] = form.elements[f].value.trim(); });
+  localStorage.setItem('customerInfo', JSON.stringify(saved));
+}
+
+let dbSaved = false;
+document.getElementById('order-form').addEventListener('submit', async e => {
+  const items = document.getElementById('hidden-items').value;
+  if (!items) {
+    e.preventDefault();
+    alert('상품을 1개 이상 선택해주세요.');
+    return;
+  }
+  if (dbSaved) return; // DB 저장 완료 후 재제출 — 그대로 통과
+
+  if (isRollover && !confirm(
+    '이번 주 주문이 마감되어, 이 주문은 다음 주 일정으로 처리됩니다.\n' +
+    '(다음 주 구매·발송, 가격 변동 시 개별 안내)\n\n이대로 주문하시겠습니까?')) {
+    e.preventDefault();
+    return;
+  }
+
+  e.preventDefault();
+  const submitBtn = e.target.querySelector('button[type=submit]');
+  submitBtn.disabled = true;
+  submitBtn.textContent = '주문 접수 중...';
+
+  const orderNo = makeOrderNo();
+  document.getElementById('hidden-orderno').value = orderNo;
+  try {
+    await saveOrderToDB(orderNo);
+  } catch (err) {
+    console.warn('DB 저장 실패 — 이메일 알림으로만 접수됩니다:', err);
+  }
+  localStorage.setItem('lastOrderNo', orderNo);
+  localStorage.setItem('lastOrderTotal', document.getElementById('sum-total').textContent);
+  saveCustomerInfo(); // 다음 주문 때 자동 입력용
+
+  dbSaved = true;
+  e.target.submit();
+});
+
+function copyAccount() {
+  navigator.clipboard.writeText('3333-00-0000000')
+    .then(() => alert('계좌번호가 복사되었습니다.'));
+}
+</script>
+</body>
+</html>

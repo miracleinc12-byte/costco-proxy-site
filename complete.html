@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>주문 완료 | 코스트코 대행</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+.complete-wrap { max-width: 600px; margin: 60px auto; padding: 0 24px; text-align: center; }
+.check-circle {
+  width: 90px; height: 90px; border-radius: 50%;
+  background: linear-gradient(135deg, #16A34A, #15803D);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 44px; margin: 0 auto 24px;
+  box-shadow: 0 8px 24px rgba(22,163,74,.35);
+  animation: pop .4s ease;
+}
+@keyframes pop { 0%{transform:scale(0)} 70%{transform:scale(1.1)} 100%{transform:scale(1)} }
+
+.complete-title { font-size: 28px; font-weight: 900; color: var(--text); margin-bottom: 8px; }
+.complete-sub { color: var(--muted); margin-bottom: 36px; }
+
+.payment-guide {
+  background: linear-gradient(135deg, #F0F4FF, #EFF6FF);
+  border: 2px solid var(--primary); border-radius: 16px;
+  padding: 28px; text-align: left; margin-bottom: 24px;
+}
+.payment-guide h3 { font-size: 18px; font-weight: 900; color: var(--primary); margin-bottom: 16px; }
+.account-big {
+  background: #fff; border-radius: 12px; padding: 20px;
+  text-align: center; margin: 16px 0;
+}
+.account-big .bank { font-size: 14px; color: var(--muted); margin-bottom: 4px; }
+.account-big .num { font-size: 26px; font-weight: 900; color: var(--primary); letter-spacing: 1px; }
+.account-big .owner { font-size: 14px; color: var(--muted); margin-top: 4px; }
+.copy-full {
+  background: var(--primary); color: #fff; border: none;
+  width: 100%; padding: 12px; border-radius: 8px;
+  font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 8px;
+}
+.steps-list { list-style: none; }
+.steps-list li {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px;
+}
+.steps-list li:last-child { border: none; }
+.step-dot {
+  width: 24px; height: 24px; border-radius: 50%;
+  background: var(--primary); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 900; flex-shrink: 0;
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-logo">🛒 <span>코스트코</span>대행</div>
+    <div class="nav-links">
+      <a href="index.html">홈</a>
+      <a href="products.html">이번 주 상품</a>
+      <a href="order.html" class="nav-cta btn">주문하기</a>
+    </div>
+  </div>
+</nav>
+
+<div class="complete-wrap">
+  <div class="check-circle">✓</div>
+  <div class="complete-title">주문이 접수되었습니다!</div>
+  <div id="order-no-box" style="display:none; background:#fff; border:1.5px dashed var(--primary); border-radius:10px; padding:12px 20px; margin:0 auto 16px; max-width:320px;">
+    <span style="font-size:13px; color:var(--muted)">주문번호</span>
+    <div id="order-no" style="font-size:20px; font-weight:900; color:var(--primary); letter-spacing:1px;"></div>
+  </div>
+  <div class="complete-sub">아래 계좌로 24시간 이내 입금해주세요<br>입금 확인 후 바로 구매를 진행합니다.</div>
+
+  <!-- 입금 안내 -->
+  <div class="payment-guide">
+    <h3>💳 입금 안내</h3>
+    <div class="account-big">
+      <div class="bank">카카오뱅크</div>
+      <div class="num">3333-00-0000000</div>
+      <div class="owner">예금주: 홍길동</div>
+    </div>
+    <button class="copy-full" onclick="copyAccount()">📋 계좌번호 복사하기</button>
+    <div class="alert alert-yellow" style="margin-top:16px; font-size:13px">
+      ⚠️ 입금자명을 <strong>주문자 이름</strong>으로 입력해주세요
+    </div>
+  </div>
+
+  <!-- 다음 단계 -->
+  <div class="order-form-card" style="text-align:left; margin-bottom:24px">
+    <h3 style="font-size:17px; font-weight:900; margin-bottom:16px; color:var(--primary)">앞으로의 진행 과정</h3>
+    <ul class="steps-list">
+      <li><div class="step-dot">1</div><div><strong>입금 확인</strong><br>입금 확인 즉시 문자/카카오로 안내드립니다.</div></li>
+      <li><div class="step-dot">2</div><div><strong>코스트코 구매</strong><br>목요일 오전 코스트코에서 직접 구매합니다.</div></li>
+      <li><div class="step-dot">3</div><div><strong>포장 & 발송</strong><br>꼼꼼히 검수 후 목요일 오후 발송합니다.</div></li>
+      <li><div class="step-dot">4</div><div><strong>배송 완료</strong><br>운송장 번호를 카카오로 보내드립니다.</div></li>
+    </ul>
+  </div>
+
+  <div class="alert alert-green" style="margin-bottom:24px; text-align:left">
+    📱 문의사항은 <strong>카카오 채널</strong>로 연락해주세요.<br>
+    운영시간: 평일 09:00 ~ 18:00
+  </div>
+
+  <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+    <a href="products.html" class="btn btn-outline">상품 더 보기</a>
+    <a href="index.html" class="btn btn-primary">홈으로</a>
+  </div>
+</div>
+
+<footer style="margin-top:60px">
+  <strong>코스트코 대행 서비스</strong>
+  <div class="footer-links">
+    <a href="index.html">홈</a>
+    <a href="products.html">이번 주 상품</a>
+    <a href="order.html">주문하기</a>
+  </div>
+  <p>카카오 채널 문의 | 운영시간: 평일 9:00~18:00</p>
+</footer>
+
+<script>
+function copyAccount() {
+  navigator.clipboard.writeText('3333-00-0000000')
+    .then(() => alert('✅ 계좌번호가 복사되었습니다!'));
+}
+
+// 주문 페이지에서 저장해둔 주문번호 표시
+const orderNo = localStorage.getItem('lastOrderNo');
+if (orderNo) {
+  document.getElementById('order-no').textContent = orderNo;
+  document.getElementById('order-no-box').style.display = 'block';
+}
+</script>
+</body>
+</html>
