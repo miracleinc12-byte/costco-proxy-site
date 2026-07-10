@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>문의 · 후기 | 코스트코 대행</title>
+<title>문의 · 후기 | 위클리카트</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
 .board-wrap { max-width: 800px; margin: 0 auto; }
@@ -27,20 +27,20 @@
   background:var(--primary); color:#fff; font-size:13px; font-weight:700;
 }
 .bt-row { border-top:1px solid var(--border); cursor:pointer; transition:background .12s; font-size:14px; }
-.bt-row:hover { background:#F0F4FF; }
+.bt-row:hover { background:#F1F5F9; }
 .bt-num { color:var(--muted); font-size:13px; text-align:center; }
 .bt-title { display:flex; align-items:center; gap:8px; min-width:0; font-weight:600; }
 .bt-title .t-text { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .reply-badge {
   flex-shrink:0; font-size:11px; font-weight:700; padding:2px 8px; border-radius:10px;
-  background:#D1FAE5; color:#065F46;
+  background:#DCFCE7; color:#166534;
 }
 .bt-name { font-size:13px; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 .bt-date { font-size:12px; color:var(--muted); text-align:right; }
 .bt-detail { border-top:1px solid var(--border); background:var(--bg); padding:18px 22px; }
 .bt-detail .post-content { font-size:14px; line-height:1.7; white-space:pre-wrap; word-break:break-word; }
 .post-reply {
-  margin-top:14px; background:#F0F4FF; border-left:3px solid var(--primary);
+  margin-top:14px; background:#EFF6FF; border-left:3px solid var(--primary);
   border-radius:0 8px 8px 0; padding:12px 14px; font-size:13px; line-height:1.6;
   white-space:pre-wrap; word-break:break-word;
 }
@@ -71,12 +71,12 @@
 
 <nav>
   <div class="nav-inner">
-    <div class="nav-logo">🛒 <span>코스트코</span>대행</div>
+    <div class="nav-logo"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> 위클리<span>카트</span></div>
     <div class="nav-links">
       <a href="index.html">홈</a>
       <a href="products.html">이번 주 상품</a>
       <a href="board.html" class="active">문의·후기</a>
-      <a href="cart.html" class="nav-cart" title="장바구니">🛒 <span id="cart-badge" class="cart-badge"></span></a>
+      <a href="cart.html" class="nav-cart" title="장바구니"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg><span id="cart-badge" class="cart-badge"></span></a>
       <a href="order.html" class="nav-cta btn">주문하기</a>
     </div>
   </div>
@@ -133,7 +133,7 @@
 </section>
 
 <footer>
-  <strong>코스트코 대행 서비스</strong>
+  <strong>위클리카트 — 코스트코 구매대행 서비스</strong>
   <div class="footer-links">
     <a href="index.html">홈</a>
     <a href="products.html">이번 주 상품</a>
@@ -146,22 +146,8 @@
 <script src="js/cart.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDSUUtoHiO3WtJ1IOiFfTPqLlCIG-_LfEI",
-  authDomain: "costco-proxy.firebaseapp.com",
-  projectId: "costco-proxy",
-  storageBucket: "costco-proxy.firebasestorage.app",
-  messagingSenderId: "145929393279",
-  appId: "1:145929393279:web:30f77a53a4f3fcaec79b4a"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c =>
-    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
-}
 function fmtDate(ts) {
   if (!ts || !ts.toDate) return '';
   const d = ts.toDate();

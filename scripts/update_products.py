@@ -28,8 +28,8 @@ ROUND_UNIT = 100          # 판매가 반올림 단위 (100원)
 PRODUCT_COUNT = 0         # 사이트에 올릴 상품 수 (0 = 전부)
 MIN_PRICE = 5000          # 이 금액 미만 상품 제외 (대행 실익 없음)
 MAX_PRICE = 150000        # 이 금액 초과 상품 제외
-DEADLINE_WEEKDAY = 2      # 주문 마감 요일 (0=월 ... 2=수)
-DEADLINE_HOUR = 15        # 주문 마감 시각 (15시)
+DEADLINE_WEEKDAY = 1      # 주문 마감 요일 (0=월 ... 1=화)
+DEADLINE_HOUR = 21        # 주문 마감 시각 (21시)
 
 BASE = "https://www.costco.co.kr"
 _FIELDS = ("&fields=products(code,name,englishName,price(FULL),basePrice(FULL),"
@@ -174,7 +174,7 @@ def extract_unit(name: str) -> str:
 
 
 def next_deadline(now: datetime) -> datetime:
-    """다음 주문 마감 시각 (다가오는 수요일 15:00)"""
+    """다음 주문 마감 시각 (다가오는 화요일 21:00)"""
     days_ahead = (DEADLINE_WEEKDAY - now.weekday()) % 7
     candidate = (now + timedelta(days=days_ahead)).replace(
         hour=DEADLINE_HOUR, minute=0, second=0, microsecond=0)
@@ -328,7 +328,7 @@ def main():
         "updated": now.strftime("%Y-%m-%d"),
         "order_deadline": deadline.strftime("%Y-%m-%dT%H:%M:%S"),
         "pickup_day": (deadline + timedelta(days=1)).strftime("%Y-%m-%d"),
-        "notice": "이번 주 냉장·냉동 제품은 목요일 발송 기준으로 금·토 도착 예정입니다.",
+        "notice": "이번 주 냉장·냉동 제품은 수요일 발송 기준으로 목~금 도착 예정입니다.",
         "products": site_products,
     }
 

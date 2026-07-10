@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>코스트코 대행 | 회원권 없이도 코스트코 인기 상품을</title>
+<title>위클리카트 | 코스트코 인기 상품, 회원권 없이 집에서</title>
 <meta name="description" content="코스트코 회원권 없이도 인기 상품을 집에서 받아보세요. 매주 할인 상품 업데이트, 주문 후 48시간 내 배송.">
 <link rel="stylesheet" href="css/style.css">
 <style>
 /* ── 히어로 ── */
 .hero {
-  background: linear-gradient(135deg, #002980 0%, #003DA5 50%, #1a56c4 100%);
-  color: #fff; padding: 80px 24px 70px; text-align: center; position: relative; overflow: hidden;
+  background: radial-gradient(1100px 520px at 50% -10%, #DBEAFE 0%, #EFF6FF 45%, #FFFFFF 100%);
+  color: #0F172A; padding: 80px 24px 70px; text-align: center; position: relative; overflow: hidden;
 }
 .hero::before {
   content: ''; position: absolute; inset: 0;
@@ -18,12 +18,12 @@
 }
 .hero > * { position: relative; }
 .hero-eyebrow {
-  display: inline-block; background: rgba(255,215,0,.2); color: #FFD700;
+  display: inline-block; background: #DBEAFE; color: #1D4ED8;
   padding: 5px 16px; border-radius: 20px; font-size: 13px; font-weight: 700; margin-bottom: 20px;
 }
-.hero h1 { font-size: clamp(28px, 5vw, 52px); font-weight: 900; line-height: 1.2; margin-bottom: 20px; }
-.hero h1 em { color: #FFD700; font-style: normal; }
-.hero p { font-size: 18px; opacity: .85; max-width: 580px; margin: 0 auto 36px; }
+.hero h1 { font-size: clamp(28px, 5vw, 52px); font-weight: 900; line-height: 1.2; margin-bottom: 20px; letter-spacing: -0.02em; }
+.hero h1 em { color: #2563EB; font-style: normal; }
+.hero p { font-size: 18px; color: #475569; max-width: 580px; margin: 0 auto 36px; }
 .hero-btns { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
 
 /* ── 신뢰 지표 ── */
@@ -66,14 +66,14 @@
   background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.07);
   overflow: hidden; transition: transform .2s, box-shadow .2s;
 }
-.preview-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,.13); }
+.preview-card:hover { transform: translateY(-4px); box-shadow: 0 8px 22px rgba(15,23,42,.10); }
 .preview-card img { width: 100%; height: 180px; object-fit: contain; background: #fff; padding: 12px; border-bottom: 1px solid var(--border); }
 .preview-card-body { padding: 16px; }
 .preview-card-body h3 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
 .price-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
 .sale-price { font-size: 20px; font-weight: 900; color: var(--red); }
 .origin-price { font-size: 13px; color: var(--muted); text-decoration: line-through; }
-.margin-chip { font-size: 11px; font-weight: 700; background: #FEE2E2; color: var(--red); padding: 2px 8px; border-radius: 4px; }
+.margin-chip { font-size: 11px; font-weight: 700; background: #E0F2FE; color: #0369A1; padding: 2px 8px; border-radius: 4px; }
 
 /* ── FAQ ── */
 .faq-list { max-width: 760px; margin: 0 auto; }
@@ -83,7 +83,7 @@
   display: flex; justify-content: space-between; align-items: center;
   transition: background .15s;
 }
-.faq-q:hover { background: #F0F4FF; }
+.faq-q:hover { background: #F1F5F9; }
 .faq-a {
   max-height: 0; overflow: hidden; transition: max-height .3s ease, padding .3s ease;
   color: var(--muted); font-size: 14px; line-height: 1.7;
@@ -94,7 +94,7 @@
 
 /* ── CTA 배너 ── */
 .cta-banner {
-  background: linear-gradient(135deg, var(--red) 0%, #c01132 100%);
+  background: linear-gradient(135deg, #0F2B57 0%, #1E3A8A 100%);
   color: #fff; text-align: center; padding: 60px 24px; border-radius: 20px;
   margin: 0 24px 64px;
 }
@@ -102,24 +102,24 @@
 .cta-banner p { opacity: .9; margin-bottom: 28px; font-size: 16px; }
 
 /* ── 히어로 미니 통계 / 스크롤 큐 ── */
-.hero-stats-mini { display:flex; gap:28px; justify-content:center; flex-wrap:wrap; margin-top:8px; font-size:13px; opacity:.85; }
-.hero-stats-mini strong { color:#FFD700; font-size:15px; }
+.hero-stats-mini { display:flex; gap:28px; justify-content:center; flex-wrap:wrap; margin-top:8px; font-size:13px; color:#475569; }
+.hero-stats-mini strong { color:#0F2B57; font-size:15px; }
 .scroll-cue {
   position:absolute; bottom:14px; left:50%; transform:translateX(-50%);
-  color:#fff; opacity:.6; font-size:26px; animation: bounce 1.8s infinite; display:block;
+  color:#94A3B8; font-size:26px; animation: bounce 1.8s infinite; display:block;
 }
 @keyframes bounce { 0%,100%{ transform:translate(-50%,0); } 50%{ transform:translate(-50%,8px); } }
 
 /* ── 마감 임박 알림바 ── */
-.urgency-bar { background:#111827; color:#fff; padding:10px 24px; text-align:center; font-size:13px; font-weight:700; }
-.urgency-bar a { color:#FFD700; }
+.urgency-bar { background:#0F2B57; color:#fff; padding:10px 24px; text-align:center; font-size:13px; font-weight:700; }
+.urgency-bar a { color:#93C5FD; }
 
 /* ── 통계 + 비교 ── */
 .stats-compare-grid { display:grid; grid-template-columns:1fr 1fr; gap:40px; align-items:center; }
 @media (max-width:800px) { .stats-compare-grid { grid-template-columns:1fr; } }
 .stat-counters { display:grid; grid-template-columns:repeat(2,1fr); gap:16px; }
 .stat-box { text-align:center; padding:24px 12px; background:var(--bg); border-radius:12px; }
-.stat-num { font-size:32px; font-weight:900; color:var(--primary); }
+.stat-num { font-size:32px; font-weight:900; color:#0F2B57; }
 .stat-label { font-size:13px; color:var(--muted); margin-top:6px; }
 .compare-table { width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow:var(--shadow); }
 .compare-table th, .compare-table td { padding:14px 12px; text-align:center; font-size:13px; border-bottom:1px solid var(--border); }
@@ -138,7 +138,7 @@
 .floating-cta {
   position:fixed; right:24px; bottom:24px; z-index:200;
   background:var(--red); color:#fff; padding:14px 22px; border-radius:50px;
-  font-weight:900; font-size:15px; box-shadow:0 8px 24px rgba(227,24,55,.4);
+  font-weight:900; font-size:15px; box-shadow:0 8px 24px rgba(15,43,87,.4);
   display:flex; align-items:center; gap:8px; transition:transform .2s;
 }
 .floating-cta:hover { transform:translateY(-3px); }
@@ -154,12 +154,12 @@
 <!-- ── 네비게이션 ── -->
 <nav>
   <div class="nav-inner">
-    <div class="nav-logo">🛒 <span>코스트코</span>대행</div>
+    <div class="nav-logo"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> 위클리<span>카트</span></div>
     <div class="nav-links">
       <a href="index.html" class="active">홈</a>
       <a href="products.html">이번 주 상품</a>
       <a href="board.html">문의·후기</a>
-      <a href="cart.html" class="nav-cart" title="장바구니">🛒 <span id="cart-badge" class="cart-badge"></span></a>
+      <a href="cart.html" class="nav-cart" title="장바구니"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg><span id="cart-badge" class="cart-badge"></span></a>
       <a href="order.html" class="nav-cta btn">주문하기</a>
     </div>
   </div>
@@ -172,11 +172,11 @@
   <p>주문 → 구매 → 배송까지 전부 대행해드립니다.<br>투명한 가격, 빠른 처리, 안심 배송.</p>
   <div class="hero-btns">
     <a href="products.html" class="btn btn-red btn-lg">이번 주 상품 보기 →</a>
-    <a href="#how" class="btn btn-outline btn-lg" style="color:#fff; border-color:rgba(255,255,255,.5)">이용 방법 보기</a>
+    <a href="#how" class="btn btn-outline btn-lg">이용 방법 보기</a>
   </div>
   <div class="hero-stats-mini">
     <span>🧾 수수료 <strong>15%</strong> 투명 공개</span>
-    <span>📦 수요일 마감 → <strong>목요일 발송</strong></span>
+    <span>📦 화요일 마감 → <strong>수요일 발송</strong></span>
     <span>💬 카카오톡 <strong>1:1</strong> 운송장 안내</span>
   </div>
   <a href="#how" class="scroll-cue" aria-label="아래로 스크롤">⌄</a>
@@ -186,28 +186,28 @@
 <div class="trust-bar">
   <div class="container">
     <div class="trust-item">
-      <div class="trust-icon">📦</div>
+      <div class="trust-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/></svg></div>
       <div>
         <div class="trust-label">주문 후 배송</div>
         <div class="trust-value">48시간 이내</div>
       </div>
     </div>
     <div class="trust-item">
-      <div class="trust-icon">💰</div>
+      <div class="trust-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg></div>
       <div>
         <div class="trust-label">가격 정책</div>
         <div class="trust-value">투명 공개</div>
       </div>
     </div>
     <div class="trust-item">
-      <div class="trust-icon">🔒</div>
+      <div class="trust-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
       <div>
         <div class="trust-label">결제</div>
         <div class="trust-value">선결제 안심</div>
       </div>
     </div>
     <div class="trust-item">
-      <div class="trust-icon">🔄</div>
+      <div class="trust-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg></div>
       <div>
         <div class="trust-label">상품 업데이트</div>
         <div class="trust-value">매주 월요일</div>
@@ -229,32 +229,32 @@
     <div class="process-grid">
       <div class="process-card">
         <div class="process-num">1</div>
-        <div class="process-icon">🛍️</div>
+        <div class="process-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></div>
         <h3>상품 선택</h3>
         <p>매주 월요일 업데이트 되는 할인 상품 중 원하시는 것을 선택하세요</p>
       </div>
       <div class="process-card">
         <div class="process-num">2</div>
-        <div class="process-icon">📝</div>
+        <div class="process-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg></div>
         <h3>주문 & 결제</h3>
         <p>주문서 작성 후 무통장입금으로 결제. 입금 확인 즉시 처리 시작</p>
       </div>
       <div class="process-card">
         <div class="process-num">3</div>
-        <div class="process-icon">🏪</div>
+        <div class="process-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12a2 2 0 0 1-2-2V7"/></svg></div>
         <h3>코스트코 구매</h3>
         <p>주문 마감 후 코스트코 매장에서 직접 구매 및 검수 진행</p>
       </div>
       <div class="process-card">
         <div class="process-num">4</div>
-        <div class="process-icon">🚚</div>
+        <div class="process-icon"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg></div>
         <h3>택배 발송</h3>
         <p>포장 완료 후 택배 발송. 운송장 번호는 카카오톡으로 안내드립니다</p>
       </div>
     </div>
 
     <div class="alert alert-blue" style="margin-top:32px;">
-      ⏰ <strong>주문 마감:</strong> 매주 수요일 오후 3시 | <strong>발송:</strong> 목요일 오후 | <strong>도착:</strong> 수도권 금요일 / 지방 토~일
+      ⏰ <strong>주문 마감:</strong> 매주 화요일 밤 9시 | <strong>발송:</strong> 수요일 오후 | <strong>도착:</strong> 수도권 목요일 / 지방 금~토
     </div>
   </div>
 </section>
@@ -262,7 +262,7 @@
 <!-- ── 왜 코스트코 대행인가 (팩트 + 비교) ── -->
 <section class="section" style="background:#fff;">
   <div class="container">
-    <div class="section-title">왜 코스트코 대행일까요?</div>
+    <div class="section-title">왜 구매대행일까요?</div>
     <div class="section-sub">회원권 없이, 매장에 가지 않고, 투명한 가격으로</div>
     <div class="stats-compare-grid">
       <div class="stat-counters">
@@ -319,17 +319,17 @@
     <div class="section-sub">과장 없이, 이 세 가지는 반드시 지킵니다</div>
     <div class="review-grid">
       <div class="review-card">
-        <div style="font-size:28px;margin-bottom:10px">🧾</div>
+        <div style="font-size:28px;margin-bottom:10px;color:var(--primary)"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><path d="M12 17.5v-11"/></svg></div>
         <div style="font-weight:900;margin-bottom:8px">투명한 가격</div>
         <div class="review-text">코스트코 실구매가에 수수료(최대 15%)만 더한 가격입니다. 할인 상품의 대행가는 항상 정가보다 낮게 책정 — 할인 혜택은 그대로 받으세요.</div>
       </div>
       <div class="review-card">
-        <div style="font-size:28px;margin-bottom:10px">📅</div>
+        <div style="font-size:28px;margin-bottom:10px;color:var(--primary)"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/></svg></div>
         <div style="font-weight:900;margin-bottom:8px">정해진 일정</div>
-        <div class="review-text">수요일 오후 3시 마감 → 목요일 매장 구매·당일 발송. 일정이 바뀌면 주문 전 미리 공지합니다.</div>
+        <div class="review-text">화요일 밤 9시 마감 → 수요일 매장 구매·당일 발송. 일정이 바뀌면 주문 전 미리 공지합니다.</div>
       </div>
       <div class="review-card">
-        <div style="font-size:28px;margin-bottom:10px">💬</div>
+        <div style="font-size:28px;margin-bottom:10px;color:var(--primary)"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg></div>
         <div style="font-weight:900;margin-bottom:8px">끝까지 안내</div>
         <div class="review-text">입금 확인, 구매 완료, 운송장 번호까지 단계마다 카카오톡으로 알려드립니다. 재고 소진 시엔 전액 환불됩니다.</div>
       </div>
@@ -388,13 +388,13 @@
 <!-- ── CTA 배너 ── -->
 <div class="cta-banner">
   <h2>지금 바로 이번 주 상품을 확인하세요</h2>
-  <p>수요일 오후 3시 마감 · 목요일 발송 · 금요일 도착</p>
+  <p>화요일 밤 9시 마감 · 수요일 발송 · 목요일 도착</p>
   <a href="products.html" class="btn btn-lg" style="background:#fff; color:var(--red);">이번 주 상품 보기 →</a>
 </div>
 
 <!-- ── 푸터 ── -->
 <footer>
-  <strong>코스트코 대행 서비스</strong>
+  <strong>위클리카트 — 코스트코 구매대행 서비스</strong>
   <div class="footer-links">
     <a href="index.html">홈</a>
     <a href="products.html">이번 주 상품</a>
@@ -404,7 +404,7 @@
   <p style="margin-top:8px;">카카오 채널 문의 | 운영시간: 평일 9:00~18:00</p>
 </footer>
 
-<a href="order.html" class="floating-cta">📝 바로 주문하기</a>
+<a href="order.html" class="floating-cta"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1 .506-.852z"/></svg> 바로 주문하기</a>
 
 <script src="js/cart.js"></script>
 <script>
@@ -433,12 +433,12 @@ fetch('data/products.json')
     const grid = document.getElementById('preview-grid');
     grid.innerHTML = data.products.slice(0, 3).map(p => `
       <div class="preview-card">
-        <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/400x180/003DA5/FFFFFF?text=${encodeURIComponent(p.name)}'">
+        <img src="${p.image}" alt="${esc(p.name)}" onerror="this.src='https://via.placeholder.com/400x180/0F2B57/FFFFFF?text=${encodeURIComponent(p.name)}'">
         <div class="preview-card-body">
-          <span class="badge ${p.cold ? 'badge-cold' : 'badge-blue'}">${p.category}</span>
-          ${p.badge ? `<span class="badge badge-red" style="margin-left:4px">${p.badge}</span>` : ''}
-          <h3 style="margin-top:8px">${p.name}</h3>
-          <small style="color:var(--muted)">${p.unit}</small>
+          <span class="badge ${p.cold ? 'badge-cold' : 'badge-blue'}">${esc(p.category)}</span>
+          ${p.badge ? `<span class="badge badge-red" style="margin-left:4px">${esc(p.badge)}</span>` : ''}
+          <h3 style="margin-top:8px">${esc(p.name)}</h3>
+          <small style="color:var(--muted)">${esc(p.unit)}</small>
           <div class="price-row">
             <span class="sale-price">${p.sale_price.toLocaleString()}원</span>
             <span class="margin-chip">대행가</span>

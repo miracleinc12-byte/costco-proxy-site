@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>장바구니 | 코스트코 대행</title>
+<title>장바구니 | 위클리카트</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
 .cart-wrap { max-width: 760px; margin: 0 auto; }
@@ -27,7 +27,7 @@
   width:32px; height:34px; border:none; background:#fff; font-size:16px;
   font-weight:900; color:var(--primary); cursor:pointer;
 }
-.qty-btn:hover { background:#F0F4FF; }
+.qty-btn:hover { background:#F1F5F9; }
 .qty-btn:disabled { color:#ccc; cursor:default; background:#fff; }
 .qty-val { width:36px; text-align:center; font-size:14px; font-weight:700; }
 
@@ -51,12 +51,12 @@
 
 <nav>
   <div class="nav-inner">
-    <div class="nav-logo">🛒 <span>코스트코</span>대행</div>
+    <div class="nav-logo"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> 위클리<span>카트</span></div>
     <div class="nav-links">
       <a href="index.html">홈</a>
       <a href="products.html">이번 주 상품</a>
       <a href="board.html">문의·후기</a>
-      <a href="cart.html" class="nav-cart active">🛒 <span id="cart-badge" class="cart-badge"></span></a>
+      <a href="cart.html" class="nav-cart active"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg><span id="cart-badge" class="cart-badge"></span></a>
       <a href="order.html" class="nav-cta btn">주문하기</a>
     </div>
   </div>
@@ -74,7 +74,7 @@
 </section>
 
 <footer>
-  <strong>코스트코 대행 서비스</strong>
+  <strong>위클리카트 — 코스트코 구매대행 서비스</strong>
   <div class="footer-links">
     <a href="index.html">홈</a>
     <a href="products.html">이번 주 상품</a>
@@ -106,7 +106,7 @@ function render() {
   if (!items.length) {
     wrap.innerHTML = `
       <div class="cart-card empty-cart">
-        <div class="ec-icon">🛒</div>
+        <div class="ec-icon" style="color:#93C5FD"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg></div>
         <p>장바구니가 비어 있습니다.<br>이번 주 할인 상품을 둘러보세요!</p>
         <a href="products.html" class="btn btn-primary btn-lg">이번 주 상품 보기 →</a>
       </div>`;
@@ -168,11 +168,6 @@ function clearAll() {
   if (!confirm('장바구니를 전부 비울까요?')) return;
   Cart.clear();
   render();
-}
-
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c =>
-    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
 }
 </script>
 </body>

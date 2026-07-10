@@ -70,10 +70,10 @@ const Cart = {
       el = document.createElement('div');
       el.id = 'cart-toast';
       el.style.cssText = 'position:fixed;bottom:90px;left:50%;transform:translateX(-50%);' +
-        'background:#111827;color:#fff;padding:12px 22px;border-radius:30px;font-size:14px;' +
+        'background:#0F2B57;color:#fff;padding:12px 22px;border-radius:30px;font-size:14px;' +
         'font-weight:700;z-index:999;opacity:0;transition:opacity .25s;box-shadow:0 8px 24px rgba(0,0,0,.3);' +
         'display:flex;gap:12px;align-items:center;white-space:nowrap;';
-      el.innerHTML = '<span id="cart-toast-msg"></span><a href="cart.html" style="color:#FFD700;font-weight:900">장바구니 보기 →</a>';
+      el.innerHTML = '<span id="cart-toast-msg"></span><a href="cart.html" style="color:#93C5FD;font-weight:900">장바구니 보기 →</a>';
       document.body.appendChild(el);
     }
     document.getElementById('cart-toast-msg').textContent = msg;
@@ -84,3 +84,9 @@ const Cart = {
 };
 
 document.addEventListener('DOMContentLoaded', () => Cart.renderBadge());
+
+/* HTML 이스케이프 (products.json 렌더링, Firestore 데이터 렌더링 공용) */
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, c =>
+    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
+}

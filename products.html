@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>이번 주 할인 상품 | 코스트코 대행</title>
+<title>이번 주 할인 상품 | 위클리카트</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
 /* ── 필터 탭 ── */
@@ -25,7 +25,7 @@
   background:#fff; border-radius:14px; box-shadow:0 2px 12px rgba(0,0,0,.07);
   overflow:hidden; transition:transform .2s, box-shadow .2s; display:flex; flex-direction:column;
 }
-.product-card:hover { transform:translateY(-4px); box-shadow:0 10px 28px rgba(0,0,0,.14); }
+.product-card:hover { transform:translateY(-4px); box-shadow:0 10px 26px rgba(15,23,42,.11); }
 
 .product-img { position:relative; height:200px; overflow:hidden; background:#fff; border-bottom:1px solid var(--border); }
 .product-img img { width:100%; height:100%; object-fit:contain; padding:14px; transition:transform .3s; }
@@ -33,7 +33,7 @@
 .product-badges { position:absolute; top:10px; left:10px; display:flex; gap:6px; flex-wrap:wrap; }
 .cold-badge {
   position:absolute; top:10px; right:10px;
-  background:#7C3AED; color:#fff; font-size:11px; font-weight:700;
+  background:#4338CA; color:#fff; font-size:11px; font-weight:700;
   padding:3px 8px; border-radius:4px;
 }
 
@@ -100,12 +100,12 @@
 
 <nav>
   <div class="nav-inner">
-    <div class="nav-logo">🛒 <span>코스트코</span>대행</div>
+    <div class="nav-logo"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> 위클리<span>카트</span></div>
     <div class="nav-links">
       <a href="index.html">홈</a>
       <a href="products.html" class="active">이번 주 상품</a>
       <a href="board.html">문의·후기</a>
-      <a href="cart.html" class="nav-cart" title="장바구니">🛒 <span id="cart-badge" class="cart-badge"></span></a>
+      <a href="cart.html" class="nav-cart" title="장바구니"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg><span id="cart-badge" class="cart-badge"></span></a>
       <a href="order.html" class="nav-cta btn">주문하기</a>
     </div>
   </div>
@@ -186,7 +186,7 @@
       <!-- 상세컷 이미지 (쇼핑몰식 상세페이지) -->
       <div id="modal-detail-imgs" style="margin-bottom:16px"></div>
       <div style="display:flex; gap:10px">
-        <button type="button" class="btn btn-primary btn-lg" style="flex:1; justify-content:center" id="modal-cart-btn">🛒 장바구니 담기</button>
+        <button type="button" class="btn btn-primary btn-lg" style="flex:1; justify-content:center" id="modal-cart-btn"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> 장바구니 담기</button>
         <a href="order.html" class="btn btn-red btn-lg" style="flex:1; justify-content:center" id="modal-order-btn">바로 주문 →</a>
       </div>
     </div>
@@ -194,7 +194,7 @@
 </div>
 
 <footer>
-  <strong>코스트코 대행 서비스</strong>
+  <strong>위클리카트 — 코스트코 구매대행 서비스</strong>
   <div class="footer-links">
     <a href="index.html">홈</a>
     <a href="products.html">이번 주 상품</a>
@@ -260,18 +260,18 @@ function renderProducts() {
   grid.innerHTML = pageItems.map(p => `
     <div class="product-card">
       <div class="product-img">
-        <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/400x200/003DA5/FFFFFF?text=${encodeURIComponent(p.name)}'">
+        <img src="${p.image}" alt="${esc(p.name)}" onerror="this.src='https://via.placeholder.com/400x200/0F2B57/FFFFFF?text=${encodeURIComponent(p.name)}'">
         <div class="product-badges">
-          ${p.badge ? `<span class="badge badge-red">${p.badge}</span>` : ''}
+          ${p.badge ? `<span class="badge badge-red">${esc(p.badge)}</span>` : ''}
           ${p.detail_images && p.detail_images.length ? '<span class="badge badge-blue">📄 상세정보</span>' : ''}
         </div>
         ${p.cold ? '<span class="cold-badge">❄️ 냉장</span>' : ''}
       </div>
       <div class="product-body">
-        <div class="product-cat">${p.category}</div>
-        <div class="product-name">${p.name}</div>
-        <div class="product-unit">📦 ${p.unit}</div>
-        <div class="product-desc">${p.description}</div>
+        <div class="product-cat">${esc(p.category)}</div>
+        <div class="product-name">${esc(p.name)}</div>
+        <div class="product-unit">📦 ${esc(p.unit)}</div>
+        <div class="product-desc">${esc(p.description)}</div>
         <div style="font-size:12px; color:var(--muted); margin-bottom:2px">
           ${p.origin_price && p.origin_price > p.costco_price ? `정가 <s>${p.origin_price.toLocaleString()}원</s> → ` : ''}코스트코 할인가 ${p.costco_price.toLocaleString()}원
         </div>
@@ -285,7 +285,7 @@ function renderProducts() {
         </div>
         <div style="display:flex; gap:8px;">
           <button class="product-btn" style="flex:1" onclick="openModal(${p.id})">상세보기</button>
-          <button class="product-btn" style="flex:1; background:var(--red)" onclick="addCart(${p.id})">🛒 담기</button>
+          <button class="product-btn" style="flex:1; background:var(--red)" onclick="addCart(${p.id})"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> 담기</button>
         </div>
       </div>
     </div>
@@ -340,7 +340,7 @@ function openModal(id) {
   document.getElementById('modal-cart-btn').onclick = () => { addCart(id); closeModal(); };
   document.getElementById('modal-img').src = p.image;
   document.getElementById('modal-badges').innerHTML =
-    `<span class="badge badge-blue">${p.category}</span> ${p.badge ? `<span class="badge badge-red" style="margin-left:4px">${p.badge}</span>` : ''}`;
+    `<span class="badge badge-blue">${esc(p.category)}</span> ${p.badge ? `<span class="badge badge-red" style="margin-left:4px">${esc(p.badge)}</span>` : ''}`;
   document.getElementById('modal-name').textContent = p.name;
   document.getElementById('modal-unit').textContent = '📦 ' + p.unit + ' | 최대 ' + p.max_qty + '개';
   document.getElementById('modal-desc').textContent = p.description;

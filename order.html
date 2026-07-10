@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>주문하기 | 코스트코 대행</title>
+<title>주문하기 | 위클리카트</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
 .order-layout { display:grid; grid-template-columns:1fr 380px; gap:28px; align-items:start; }
@@ -48,7 +48,7 @@
 
 /* ── 결제 안내 ── */
 .payment-box {
-  background:linear-gradient(135deg,#F0F4FF,#EFF6FF);
+  background:linear-gradient(135deg,#EFF6FF,#DBEAFE);
   border:2px solid var(--primary); border-radius:12px; padding:20px;
 }
 .account-info { background:#fff; border-radius:8px; padding:14px; margin-top:12px; }
@@ -70,12 +70,12 @@
 
 <nav>
   <div class="nav-inner">
-    <div class="nav-logo">🛒 <span>코스트코</span>대행</div>
+    <div class="nav-logo"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> 위클리<span>카트</span></div>
     <div class="nav-links">
       <a href="index.html">홈</a>
       <a href="products.html">이번 주 상품</a>
       <a href="board.html">문의·후기</a>
-      <a href="cart.html" class="nav-cart" title="장바구니">🛒 <span id="cart-badge" class="cart-badge"></span></a>
+      <a href="cart.html" class="nav-cart" title="장바구니"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg><span id="cart-badge" class="cart-badge"></span></a>
       <a href="order.html" class="nav-cta btn active">주문하기</a>
     </div>
   </div>
@@ -89,7 +89,7 @@
 <section class="section">
   <div class="container">
     <div class="alert alert-yellow" style="margin-bottom:24px" id="deadline-notice">
-      ⏰ <strong>주문 마감:</strong> 매주 수요일 오후 3시 | 마감 이후 주문은 다음 주 처리됩니다.
+      ⏰ <strong>주문 마감:</strong> 매주 화요일 밤 9시 | 마감 이후 주문은 다음 주 처리됩니다.
     </div>
     <div class="alert alert-red" style="margin-bottom:24px; display:none" id="rollover-notice">
       🚨 <div><strong>이번 주 주문이 마감되었습니다.</strong><br>
@@ -100,7 +100,7 @@
     <!-- FormSubmit 사용: 이메일 주소를 본인 이메일로 변경하세요 -->
     <form id="order-form" action="https://formsubmit.co/miracleinc12@gmail.com" method="POST">
       <!-- FormSubmit 설정 -->
-      <input type="hidden" name="_subject" value="[코스트코대행] 새 주문이 들어왔습니다!">
+      <input type="hidden" name="_subject" value="[위클리카트] 새 주문이 들어왔습니다!">
       <input type="hidden" name="_next" id="hidden-next" value="">
       <input type="hidden" name="_captcha" value="false">
       <input type="hidden" name="_template" value="table">
@@ -256,7 +256,7 @@
 </div>
 
 <footer>
-  <strong>코스트코 대행 서비스</strong>
+  <strong>위클리카트 — 코스트코 구매대행 서비스</strong>
   <div class="footer-links">
     <a href="index.html">홈</a>
     <a href="products.html">이번 주 상품</a>
@@ -269,26 +269,8 @@
 <!-- Firebase (주문 DB 저장) -->
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
 <script>
-// ═══════════════════════════════════════════════════════
-// Firebase 설정 — FIREBASE_설정법.txt 참고해서 아래 값을 교체하세요
-// 값을 교체하기 전까지는 DB 저장 없이 이메일 알림만 작동합니다
-// ═══════════════════════════════════════════════════════
-const firebaseConfig = {
-  apiKey: "AIzaSyDSUUtoHiO3WtJ1IOiFfTPqLlCIG-_LfEI",
-  authDomain: "costco-proxy.firebaseapp.com",
-  projectId: "costco-proxy",
-  storageBucket: "costco-proxy.firebasestorage.app",
-  messagingSenderId: "145929393279",
-  appId: "1:145929393279:web:30f77a53a4f3fcaec79b4a"
-};
-
-let db = null;
-if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
-  firebase.initializeApp(firebaseConfig);
-  db = firebase.firestore();
-}
-
 function makeOrderNo() {
   const d = new Date();
   const ymd = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
@@ -371,7 +353,7 @@ function addItem(presetId, qty = 1) {
     <img class="item-thumb empty" id="thumb-${idx}" src="" alt="상품 이미지" onerror="this.classList.add('empty')">
     <select onchange="updateSummary()" id="select-${idx}">
       <option value="">-- 상품 선택 --</option>
-      ${products.map(p => `<option value="${p.id}" data-price="${p.sale_price}" data-name="${p.name}" data-max="${p.max_qty}" ${p.id == presetId ? 'selected' : ''}>${p.name} — ${p.sale_price.toLocaleString()}원</option>`).join('')}
+      ${products.map(p => `<option value="${p.id}" data-price="${p.sale_price}" data-name="${esc(p.name)}" data-max="${p.max_qty}" ${p.id == presetId ? 'selected' : ''}>${esc(p.name)} — ${p.sale_price.toLocaleString()}원</option>`).join('')}
     </select>
     <input type="number" min="1" max="3" value="${qty}" id="qty-${idx}" onchange="updateSummary()">
     <button type="button" class="item-remove" onclick="removeItem(${idx})">✕</button>
@@ -415,7 +397,7 @@ function updateSummary() {
     const name = opt.dataset.name;
     const subtotal = price * Math.min(qty, max);
     total += subtotal;
-    summaryLines.push(`<div class="summary-row" data-pid="${opt.value}"><span>${name} × ${Math.min(qty,max)}</span><span>${subtotal.toLocaleString()}원</span></div>`);
+    summaryLines.push(`<div class="summary-row" data-pid="${opt.value}"><span>${esc(name)} × ${Math.min(qty,max)}</span><span>${subtotal.toLocaleString()}원</span></div>`);
     itemTexts.push(`${name} × ${Math.min(qty,max)}개 (${subtotal.toLocaleString()}원)`);
     cartSync.push({ id: parseInt(opt.value), name, price, qty: Math.min(qty, max) });
   });

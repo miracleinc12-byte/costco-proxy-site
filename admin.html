@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
-<title>주문 관리 | 코스트코 대행</title>
+<title>주문 관리 | 위클리카트</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
 .admin-wrap { max-width: 1280px; margin: 0 auto; padding: 24px; }
@@ -36,7 +36,7 @@
 .st-입금대기 { background:#FEF3C7; color:#92400E; }
 .st-입금확인 { background:#DBEAFE; color:#1E40AF; }
 .st-구매완료 { background:#EDE9FE; color:#5B21B6; }
-.st-발송완료 { background:#D1FAE5; color:#065F46; }
+.st-발송완료 { background:#DCFCE7; color:#166534; }
 .st-취소 { background:#FEE2E2; color:#991B1B; }
 
 .order-actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; border-top:1px solid var(--border); padding-top:12px; }
@@ -55,7 +55,7 @@
 
 <nav>
   <div class="nav-inner">
-    <div class="nav-logo">🛒 <span>코스트코</span>대행 <span style="font-size:13px;color:#fff;opacity:.7;margin-left:6px">관리자</span></div>
+    <div class="nav-logo"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> 위클리<span>카트</span> <span style="font-size:13px;color:#fff;opacity:.7;margin-left:6px">관리자</span></div>
     <div class="nav-links">
       <a href="index.html">사이트로 이동</a>
     </div>
@@ -98,20 +98,12 @@
   </div>
 </div>
 
+<script src="js/cart.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="js/firebase-init.js"></script>
 <script>
-const firebaseConfig = {
-  apiKey: "AIzaSyDSUUtoHiO3WtJ1IOiFfTPqLlCIG-_LfEI",
-  authDomain: "costco-proxy.firebaseapp.com",
-  projectId: "costco-proxy",
-  storageBucket: "costco-proxy.firebasestorage.app",
-  messagingSenderId: "145929393279",
-  appId: "1:145929393279:web:30f77a53a4f3fcaec79b4a"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
 const auth = firebase.auth();
 
 const STATUSES = ['입금대기', '입금확인', '구매완료', '발송완료', '취소'];
@@ -206,16 +198,11 @@ function render() {
           ${COURIERS.map(c => `<option ${o.courier === c ? 'selected' : ''}>${c}</option>`).join('')}
         </select>
         <input class="tracking" id="tr-${o.id}" placeholder="운송장 번호" value="${esc(o.trackingNo) || ''}">
-        <button class="mini-btn" onclick="saveOrder('${o.id}')">💾 저장</button>
-        <button class="mini-btn gray" onclick="copyMsg('${o.id}')">📋 고객 안내문 복사</button>
+        <button class="mini-btn" onclick="saveOrder('${o.id}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></svg> 저장</button>
+        <button class="mini-btn gray" onclick="copyMsg('${o.id}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="8" height="4" x="8" y="2" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg> 고객 안내문 복사</button>
       </div>
     </div>
   `).join('');
-}
-
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, c =>
-    ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' })[c]);
 }
 
 function setFilter(s) { filterStatus = s; render(); }
@@ -254,7 +241,7 @@ function subscribeBoard() {
                 <div style="font-size:14px;line-height:1.7;white-space:pre-wrap;word-break:break-word">${esc(p.content)}</div>
                 <div class="order-actions">
                   <span style="font-size:12px;color:var(--muted)">※ 답변은 남긴 연락처로 직접 연락</span>
-                  <button class="mini-btn gray" style="margin-left:auto" onclick="deleteDoc('inquiries','${d.id}')">🗑 삭제</button>
+                  <button class="mini-btn gray" style="margin-left:auto" onclick="deleteDoc('inquiries','${d.id}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> 삭제</button>
                 </div>
               </div>`;
           }).join('');
@@ -277,8 +264,8 @@ function subscribeBoard() {
                 <div style="font-size:14px;line-height:1.7;white-space:pre-wrap;word-break:break-word;margin-bottom:10px">${esc(p.content)}</div>
                 <div class="order-actions">
                   <input style="flex:1;min-width:200px" id="rp-${d.id}" placeholder="답변 입력 (게시판에 공개 표시됨)" value="${esc(p.reply) || ''}">
-                  <button class="mini-btn" onclick="saveReply('${d.id}')">💬 답변 저장</button>
-                  <button class="mini-btn gray" onclick="deleteDoc('posts','${d.id}')">🗑 삭제</button>
+                  <button class="mini-btn" onclick="saveReply('${d.id}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg> 답변 저장</button>
+                  <button class="mini-btn gray" onclick="deleteDoc('posts','${d.id}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg> 삭제</button>
                 </div>
               </div>`;
           }).join('');
@@ -302,7 +289,7 @@ async function deleteDoc(col, id) {
 function copyMsg(id) {
   const o = orders.find(x => x.id === id);
   if (!o) return;
-  const lines = [`[코스트코대행] ${o.name}님, 안녕하세요!`];
+  const lines = [`[위클리카트] ${o.name}님, 안녕하세요!`];
   if (o.status === '발송완료' || o.trackingNo) {
     lines.push(`주문하신 상품이 발송되었습니다. 🚚`);
     lines.push(`· 주문번호: ${o.orderNo || o.id}`);
@@ -312,7 +299,7 @@ function copyMsg(id) {
   } else if (o.status === '입금확인' || o.status === '구매완료') {
     lines.push(`입금이 확인되었습니다. 감사합니다! 🙏`);
     lines.push(`· 주문번호: ${o.orderNo || o.id}`);
-    lines.push(`목요일 코스트코 구매 후 발송해드리며, 운송장 번호를 다시 안내드리겠습니다.`);
+    lines.push(`수요일 코스트코 구매 후 발송해드리며, 운송장 번호를 다시 안내드리겠습니다.`);
   } else {
     lines.push(`주문이 접수되었습니다.`);
     lines.push(`· 주문번호: ${o.orderNo || o.id}`);
