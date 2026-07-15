@@ -187,7 +187,8 @@ footer .footer-links { display: flex; justify-content: center; gap: 20px; margin
 /* ── 반응형 ───────────────────────────── */
 @media (max-width: 768px) {
   .form-row { grid-template-columns: 1fr; }
-  /* 모바일: 메뉴를 숨기지 않고 압축해서 전부 표시 */
+  /* 모바일: 메뉴 압축 표시 ('이번 주 상품'만 숨김 — 홈·플로팅 버튼으로 대체) */
+  .nav-links a[href="products.html"] { display: none; }
   .nav-inner { padding: 0 10px; height: 56px; }
   .nav-logo { font-size: 15px; gap: 5px; }
   .nav-links { gap: 0; }
