@@ -321,6 +321,39 @@ def main():
     if excluded:
         print(f"  마진 {MIN_MARGIN_WON:,}원 미만으로 제외된 상품: {excluded}개")
 
+    # 매장 전용 인기템(수동 큐레이션) 병합 — 맨 앞에 배치 후 id 일괄 재부여
+    store_only_path = ROOT / "data" / "store_only.json"
+    if store_only_path.exists():
+        try:
+            store_data = json.loads(store_only_path.read_text(encoding="utf-8"))
+            store_items = []
+            for it in store_data.get("items", []):
+                cp = it["costco_price"]
+                store_items.append({
+                    "id": 0,
+                    "name": it["name"],
+                    "category": it["category"],
+                    "origin_price": cp,
+                    "costco_price": cp,
+                    "sale_price": round(cp * (1 + MARGIN_RATE) / ROUND_UNIT) * ROUND_UNIT,
+                    "unit": it["unit"],
+                    "max_qty": it["max_qty"],
+                    "badge": "매장 전용",
+                    "store_only": True,
+                    "cold": it["cold"],
+                    "description": it["description"],
+                    "image": it["image"],
+                    "gallery": [],
+                    "detail_images": [],
+                    "costco_url": "",
+                })
+            site_products = store_items + site_products
+            for i, sp in enumerate(site_products, 1):
+                sp["id"] = i
+            print(f"  매장 전용 인기템 {len(store_items)}개 병합")
+        except Exception as e:
+            print(f"!! store_only.json 병합 실패 (건너뜀): {e}")
+
     now = datetime.now()
     deadline = next_deadline(now)
     result = {
