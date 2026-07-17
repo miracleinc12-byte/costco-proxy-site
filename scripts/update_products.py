@@ -152,6 +152,11 @@ def pick_image(images: list) -> str:
         for img in images or []:
             if img.get("format") == fmt and img.get("url", "").endswith(".jpg"):
                 return BASE + img["url"]
+    # jpg가 없는 상품은 포맷 무관 첫 이미지라도 사용 (webp/png 등)
+    for fmt in ("product", "results", "thumbnail"):
+        for img in images or []:
+            if img.get("format") == fmt and img.get("url"):
+                return BASE + img["url"]
     return ""
 
 

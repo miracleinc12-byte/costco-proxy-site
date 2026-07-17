@@ -435,7 +435,7 @@ fetch('data/products.json')
     const grid = document.getElementById('preview-grid');
     grid.innerHTML = data.products.slice(0, 3).map(p => `
       <div class="preview-card">
-        <img src="${p.image}" alt="${esc(p.name)}" onerror="this.src='https://via.placeholder.com/400x180/0F2B57/FFFFFF?text=${encodeURIComponent(p.name)}'">
+        <img src="${p.image || IMG_PH}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src=IMG_PH">
         <div class="preview-card-body">
           <span class="badge ${p.cold ? 'badge-cold' : 'badge-blue'}">${esc(p.category)}</span>
           ${p.badge ? `<span class="badge badge-red" style="margin-left:4px">${esc(p.badge)}</span>` : ''}

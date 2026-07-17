@@ -264,7 +264,7 @@ function renderProducts() {
   grid.innerHTML = pageItems.map(p => `
     <div class="product-card">
       <div class="product-img">
-        <img src="${p.image}" alt="${esc(p.name)}" onerror="this.src='https://via.placeholder.com/400x200/0F2B57/FFFFFF?text=${encodeURIComponent(p.name)}'">
+        <img src="${p.image || IMG_PH}" alt="${esc(p.name)}" onerror="this.onerror=null;this.src=IMG_PH">
         <div class="product-badges">
           ${p.badge ? `<span class="badge badge-red">${esc(p.badge)}</span>` : ''}
           ${p.detail_images && p.detail_images.length ? '<span class="badge badge-blue">📄 상세정보</span>' : ''}
@@ -342,7 +342,9 @@ function openModal(id) {
   const p = allProducts.find(x => x.id === id);
   if (!p) return;
   document.getElementById('modal-cart-btn').onclick = () => { addCart(id); closeModal(); };
-  document.getElementById('modal-img').src = p.image;
+  const modalImg = document.getElementById('modal-img');
+  modalImg.onerror = () => { modalImg.onerror = null; modalImg.src = IMG_PH; };
+  modalImg.src = p.image || IMG_PH;
   document.getElementById('modal-badges').innerHTML =
     `<span class="badge badge-blue">${esc(p.category)}</span> ${p.badge ? `<span class="badge badge-red" style="margin-left:4px">${esc(p.badge)}</span>` : ''}`;
   document.getElementById('modal-name').textContent = p.name;

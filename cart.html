@@ -122,7 +122,7 @@ function render() {
         const max = p ? p.max_qty : 3;
         return `
           <div class="cart-item">
-            <img src="${p ? p.image : ''}" alt="" onerror="this.style.visibility='hidden'">
+            <img src="${(p && p.image) || IMG_PH}" alt="" onerror="this.onerror=null;this.src=IMG_PH">
             <div>
               <div class="ci-name">${esc(it.name)}</div>
               <div class="ci-price">${(it.price * it.qty).toLocaleString()}원

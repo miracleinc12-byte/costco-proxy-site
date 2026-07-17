@@ -2,6 +2,15 @@
    장바구니 공용 모듈 (localStorage 기반, 로그인 불필요)
    상품이 매주 갱신되므로 주차(week)가 바뀌면 자동으로 비워짐
    ───────────────────────────────────────────── */
+
+/* 이미지 없거나 로드 실패 시 대체 이미지 (내장 SVG — 외부 서비스 비의존) */
+const IMG_PH = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">' +
+  '<rect width="100%" height="100%" fill="#F1F5F9"/>' +
+  '<g transform="translate(176,105)" stroke="#94A3B8" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">' +
+  '<circle cx="16" cy="42" r="2.5"/><circle cx="38" cy="42" r="2.5"/>' +
+  '<path d="M4 4h4l5.3 24.9a4 4 0 0 0 4 3.1h19.6a4 4 0 0 0 3.9-3.1L44 14H10.2"/></g>' +
+  '<text x="200" y="195" text-anchor="middle" font-family="sans-serif" font-size="15" fill="#64748B">이미지 준비 중</text></svg>');
 const Cart = {
   KEY: 'cart',
 
