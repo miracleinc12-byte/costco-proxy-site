@@ -441,6 +441,7 @@ fetch('data/products.json')
           ${p.badge ? `<span class="badge badge-red" style="margin-left:4px">${esc(p.badge)}</span>` : ''}
           <h3 style="margin-top:8px">${esc(p.name)}</h3>
           <small style="color:var(--muted)">${esc(p.unit)}</small>
+          ${p.reviews > 0 ? `<div style="font-size:12px;color:#B45309;font-weight:700;margin-top:6px">★ ${p.rating.toFixed(1)} <span style="color:var(--muted);font-weight:400">(${p.reviews.toLocaleString()})</span></div>` : ''}
           <div class="price-row">
             <span class="sale-price">${p.sale_price.toLocaleString()}원</span>
             <span class="margin-chip">대행가</span>

@@ -42,6 +42,8 @@
 .product-cat { font-size:12px; color:var(--muted); margin-bottom:4px; }
 .product-name { font-size:16px; font-weight:700; margin-bottom:4px; line-height:1.4; }
 .product-unit { font-size:12px; color:var(--muted); margin-bottom:10px; }
+.product-rating { font-size:12px; color:#B45309; font-weight:700; margin-bottom:8px; }
+.product-rating span { color:var(--muted); font-weight:400; }
 .product-desc { font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:14px; flex:1; }
 
 .product-price-row { display:flex; align-items:flex-end; gap:8px; margin-bottom:14px; }
@@ -173,7 +175,8 @@
     <div class="modal-body">
       <div id="modal-badges"></div>
       <div class="modal-name" id="modal-name"></div>
-      <div style="color:var(--muted);font-size:13px;margin-bottom:14px" id="modal-unit"></div>
+      <div style="color:var(--muted);font-size:13px;margin-bottom:6px" id="modal-unit"></div>
+      <div class="product-rating" style="margin-bottom:14px" id="modal-rating"></div>
       <p style="font-size:14px;color:var(--muted);line-height:1.7;margin-bottom:20px" id="modal-desc"></p>
       <div style="font-size:12px;color:var(--muted)" id="modal-costco-price"></div>
       <div style="display:flex;align-items:center;gap:12px;margin-bottom:4px">
@@ -268,6 +271,7 @@ function renderProducts() {
         <div class="product-badges">
           ${p.badge ? `<span class="badge badge-red">${esc(p.badge)}</span>` : ''}
           ${p.detail_images && p.detail_images.length ? '<span class="badge badge-blue">📄 상세정보</span>' : ''}
+          ${p.best ? '<span class="badge badge-green">⭐ 베스트</span>' : ''}
         </div>
         ${p.cold ? '<span class="cold-badge">❄️ 냉장</span>' : ''}
       </div>
@@ -275,6 +279,7 @@ function renderProducts() {
         <div class="product-cat">${esc(p.category)}</div>
         <div class="product-name">${esc(p.name)}</div>
         <div class="product-unit">📦 ${esc(p.unit)}</div>
+        ${p.reviews > 0 ? `<div class="product-rating">★ ${p.rating.toFixed(1)} <span>(${p.reviews.toLocaleString()})</span></div>` : ''}
         <div class="product-desc">${esc(p.description)}</div>
         <div style="font-size:12px; color:var(--muted); margin-bottom:2px">
           ${p.origin_price && p.origin_price > p.costco_price ? `정가 <s>${p.origin_price.toLocaleString()}원</s> → ` : ''}코스트코 할인가 ${p.costco_price.toLocaleString()}원
@@ -349,6 +354,8 @@ function openModal(id) {
     `<span class="badge badge-blue">${esc(p.category)}</span> ${p.badge ? `<span class="badge badge-red" style="margin-left:4px">${esc(p.badge)}</span>` : ''}`;
   document.getElementById('modal-name').textContent = p.name;
   document.getElementById('modal-unit').textContent = '📦 ' + p.unit + ' | 최대 ' + p.max_qty + '개';
+  document.getElementById('modal-rating').innerHTML = p.reviews > 0
+    ? `★ ${p.rating.toFixed(1)} <span>(${p.reviews.toLocaleString()})</span>` : '';
   document.getElementById('modal-desc').textContent = p.description;
   document.getElementById('modal-costco-price').innerHTML =
     (p.origin_price && p.origin_price > p.costco_price

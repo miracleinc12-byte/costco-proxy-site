@@ -28,13 +28,15 @@ ROUND_UNIT = 100          # 판매가 반올림 단위 (100원)
 PRODUCT_COUNT = 0         # 사이트에 올릴 상품 수 (0 = 전부)
 MIN_PRICE = 5000          # 이 금액 미만 상품 제외 (대행 실익 없음)
 MAX_PRICE = 150000        # 이 금액 초과 상품 제외
+BEST_REVIEW_MIN = 300     # 이 이상 리뷰면 '베스트' 배지
 DEADLINE_WEEKDAY = 1      # 주문 마감 요일 (0=월 ... 1=화)
 DEADLINE_HOUR = 21        # 주문 마감 시각 (21시)
 
 BASE = "https://www.costco.co.kr"
 _FIELDS = ("&fields=products(code,name,englishName,price(FULL),basePrice(FULL),"
            "as400Discount,discountPrice(FULL),images(DEFAULT),maxOrderQuantity,"
-           "stock(DEFAULT),url,purchasable),pagination&lang=ko&curr=KRW")
+           "stock(DEFAULT),url,purchasable,averageRating,numberOfReviews)"
+           ",pagination&lang=ko&curr=KRW")
 # '스페셜 할인'(SpecialPriceOffers) 카테고리 = 현재 할인 중인 상품 전체
 API = (BASE + "/rest/v2/korea/products/search"
        "?query=%3Arelevance%3AallCategories%3ASpecialPriceOffers"
@@ -213,6 +215,7 @@ def to_site_product(p: dict, pid: int, detail: dict) -> dict | None:
         if sale_price - costco_price < MIN_MARGIN_WON:
             return None
     name = p["name"].strip()
+    reviews = int(p.get("numberOfReviews") or 0)
     main_image = pick_image(p.get("images"))
     gallery = detail.get("gallery") or []
     if main_image and main_image not in gallery:
@@ -227,6 +230,9 @@ def to_site_product(p: dict, pid: int, detail: dict) -> dict | None:
         "unit": extract_unit(name),
         "max_qty": min(int(p.get("maxOrderQuantity") or 3), 3),
         "badge": f"{discount:,}원 할인" if discount else "인기 상품",
+        "rating": round(float(p.get("averageRating") or 0), 1),
+        "reviews": reviews,
+        "best": reviews >= BEST_REVIEW_MIN,
         "cold": is_cold(name),
         "description": (f"코스트코 정가 {base_price:,}원에서 {discount:,}원 할인 중인 상품입니다."
                         if discount else "코스트코에서 꾸준히 사랑받는 인기 상품입니다."),
@@ -280,13 +286,11 @@ def main():
     # 비할인 인기 상품 수집 (전체 검색 상위 노출 순)
     if POPULAR_COUNT:
         print(f"\n인기 상품(비할인) 수집 중... (목표 {POPULAR_COUNT}개)")
-        popular = []
+        pool_ = []
         page = 0
-        while len(popular) < POPULAR_COUNT and page < 5:
+        while page < 5:
             data = fetch_page(page, POPULAR_API)
             for p in data.get("products", []):
-                if len(popular) >= POPULAR_COUNT:
-                    break
                 if p.get("as400Discount"):
                     continue  # 할인 상품은 이미 수집됨
                 if p.get("code") in seen:
@@ -301,9 +305,13 @@ def main():
                 if any(k in p.get("name", "") for k in EXCLUDE_KEYWORDS):
                     continue
                 seen.add(p["code"])
-                popular.append(p)
+                pool_.append(p)
             page += 1
-        print(f"  인기 상품 {len(popular)}개 확보")
+        # 리뷰 수 내림차순 → 상위 POPULAR_COUNT개
+        pool_.sort(key=lambda x: int(x.get("numberOfReviews") or 0), reverse=True)
+        popular = pool_[:POPULAR_COUNT]
+        top = int(popular[0].get("numberOfReviews") or 0) if popular else 0
+        print(f"  인기 상품 {len(popular)}개 확보 (리뷰 최다: {top:,}개)")
         selected = selected + popular
 
     # 상세정보(실제 설명 + 갤러리) 병렬 수집
