@@ -29,6 +29,7 @@ PRODUCT_COUNT = 0         # 사이트에 올릴 상품 수 (0 = 전부)
 MIN_PRICE = 5000          # 이 금액 미만 상품 제외 (대행 실익 없음)
 MAX_PRICE = 150000        # 이 금액 초과 상품 제외
 BEST_REVIEW_MIN = 300     # 이 이상 리뷰면 '베스트' 배지
+SUMMER_MONTHS = (6, 7, 8, 9)  # 이 기간엔 냉장·냉동 상품 목록에서 제외 (배송 중 변질 위험)
 DEADLINE_WEEKDAY = 1      # 주문 마감 요일 (0=월 ... 1=화)
 DEADLINE_HOUR = 21        # 주문 마감 시각 (21시)
 
@@ -334,6 +335,13 @@ def main():
     if excluded:
         print(f"  마진 {MIN_MARGIN_WON:,}원 미만으로 제외된 상품: {excluded}개")
 
+    # 여름철(6~9월) 냉장·냉동 상품 제외 — 배송 중 변질 위험
+    summer = datetime.now().month in SUMMER_MONTHS
+    if summer:
+        before = len(site_products)
+        site_products = [p for p in site_products if not p.get("cold")]
+        print(f"  여름철 냉장·냉동 제외: {before - len(site_products)}개")
+
     # 매장 전용 인기템(수동 큐레이션) 병합 — 맨 앞에 배치 후 id 일괄 재부여
     store_only_path = ROOT / "data" / "store_only.json"
     if store_only_path.exists():
@@ -343,6 +351,8 @@ def main():
             enabled = store_data.get("enabled", True)
             store_items = []
             for it in (store_data.get("items", []) if enabled else []):
+                if summer and it.get("cold"):
+                    continue  # 여름철 냉장·냉동 제외
                 cp = it["costco_price"]
                 store_items.append({
                     "id": 0,
@@ -363,12 +373,14 @@ def main():
                     "costco_url": "",
                 })
             site_products = store_items + site_products
-            for i, sp in enumerate(site_products, 1):
-                sp["id"] = i
             print(f"  매장 전용 인기템 {len(store_items)}개 병합"
                   + ("" if enabled else "  (enabled=false — 숨김 상태)"))
         except Exception as e:
             print(f"!! store_only.json 병합 실패 (건너뜀): {e}")
+
+    # id 일괄 재부여 (제외·병합 후 최종 순서 기준)
+    for i, sp in enumerate(site_products, 1):
+        sp["id"] = i
 
     now = datetime.now()
     deadline = next_deadline(now)
