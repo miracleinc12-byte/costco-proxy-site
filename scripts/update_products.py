@@ -339,8 +339,10 @@ def main():
     if store_only_path.exists():
         try:
             store_data = json.loads(store_only_path.read_text(encoding="utf-8"))
+            # enabled: false 면 사이트에 노출하지 않음 (데이터는 보존)
+            enabled = store_data.get("enabled", True)
             store_items = []
-            for it in store_data.get("items", []):
+            for it in (store_data.get("items", []) if enabled else []):
                 cp = it["costco_price"]
                 store_items.append({
                     "id": 0,
@@ -363,7 +365,8 @@ def main():
             site_products = store_items + site_products
             for i, sp in enumerate(site_products, 1):
                 sp["id"] = i
-            print(f"  매장 전용 인기템 {len(store_items)}개 병합")
+            print(f"  매장 전용 인기템 {len(store_items)}개 병합"
+                  + ("" if enabled else "  (enabled=false — 숨김 상태)"))
         except Exception as e:
             print(f"!! store_only.json 병합 실패 (건너뜀): {e}")
 
