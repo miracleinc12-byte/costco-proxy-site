@@ -184,6 +184,46 @@ def extract_unit(name: str) -> str:
     return m.group(0).strip() if m else "1개"
 
 
+# 개당 개수 계산용 토큰
+_COUNT_TOK = r"개입|입|개|매|롤|팩|병|캔|포|정|캡슐|ct|봉|조각|스틱|구"
+_WEIGHT_TOK = r"mg|kg|ml|cc|리터|인치|g|L|m"   # 이 토큰에 붙은 숫자는 개수 아님
+_NUM = r"\d[\d,]*(?:\.\d+)?"
+_UNIT_RE = re.compile(rf"({_NUM})\s*({_COUNT_TOK}|{_WEIGHT_TOK})?", re.IGNORECASE)
+_COUNT_RE = re.compile(_COUNT_TOK, re.IGNORECASE)
+
+
+def parse_unit_count(unit: str) -> "int | None":
+    """unit 문자열에서 총 개수(piece count) 계산. 확실할 때만 정수, 애매하면 None.
+    - 개수 토큰(개/입/롤/팩/캡슐...) 숫자와 x/× 뒤 맨숫자는 곱함
+    - 무게·용량 토큰(kg/g/ml/L...)에 붙은 숫자는 제외 (250ml의 250은 개수 아님)
+    - 곱 결과가 정수이고 2 이상일 때만 반환
+    """
+    if not unit:
+        return None
+    factors = []
+    for m in _UNIT_RE.finditer(unit):
+        tok = m.group(2)
+        try:
+            val = float(m.group(1).replace(",", ""))
+        except ValueError:
+            continue
+        if tok is None:  # 맨숫자: 앞이 곱셈기호일 때만 곱수로 인정
+            prefix = unit[:m.start()].rstrip()
+            if prefix and prefix[-1] in "xX×*":
+                factors.append(val)
+        elif _COUNT_RE.fullmatch(tok):  # 개수 토큰
+            factors.append(val)
+        # 무게·용량 토큰이면 제외
+    if not factors:
+        return None
+    count = 1.0
+    for f in factors:
+        count *= f
+    if count != int(count) or int(count) < 2:
+        return None
+    return int(count)
+
+
 def next_deadline(now: datetime) -> datetime:
     """다음 주문 마감 시각 (다가오는 화요일 21:00)"""
     days_ahead = (DEADLINE_WEEKDAY - now.weekday()) % 7
@@ -224,14 +264,15 @@ def to_site_product(p: dict, pid: int, detail: dict) -> dict | None:
     gallery = detail.get("gallery") or []
     if main_image and main_image not in gallery:
         gallery = [main_image] + gallery
-    return {
+    unit = extract_unit(name)
+    sp = {
         "id": pid,
         "name": name,
         "category": classify(name),
         "origin_price": base_price,
         "costco_price": costco_price,
         "sale_price": sale_price,
-        "unit": extract_unit(name),
+        "unit": unit,
         "max_qty": min(int(p.get("maxOrderQuantity") or 3), 3),
         "badge": f"{discount:,}원 할인" if discount else "인기 상품",
         "rating": round(float(p.get("averageRating") or 0), 1),
@@ -245,6 +286,14 @@ def to_site_product(p: dict, pid: int, detail: dict) -> dict | None:
         "detail_images": detail.get("detail_images") or [],
         "costco_url": BASE + p.get("url", ""),
     }
+    # 개당 단가: 확실히 파싱되고 개당가가 10원 이상일 때만 표시 (오답 방지)
+    count = parse_unit_count(unit)
+    if count and count >= 2:
+        unit_price = round(sale_price / count)
+        if unit_price >= 10:
+            sp["unit_count"] = count
+            sp["unit_price"] = unit_price
+    return sp
 
 
 def main():
@@ -413,5 +462,20 @@ def main():
         print("push 완료 — GitHub Pages에 몇 분 내 반영됩니다.")
 
 
+def _selftest():
+    cases = {
+        "24개입": 24, "30롤 x 2팩": 60, "100매 × 9팩": 900,
+        "250ml x 24팩": 24, "190ml x 24 x 3": 72, "500mg x 75캡슐 x 2": 150,
+        "1.13kg": None, "1개": None, "1kg": None, "": None,
+    }
+    for unit, expected in cases.items():
+        got = parse_unit_count(unit)
+        assert got == expected, f"{unit!r}: expected {expected}, got {got}"
+    print("parse_unit_count 자체검증 통과")
+
+
 if __name__ == "__main__":
-    main()
+    if "--selftest" in sys.argv:
+        _selftest()
+    else:
+        main()
