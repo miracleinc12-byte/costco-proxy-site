@@ -140,6 +140,9 @@ def fetch_detail(code: str) -> dict:
         detail_images = []
         for s in srcs:
             u = s if s.startswith("http") else BASE + s
+            fname = u.rsplit("/", 1)[-1].split("?")[0].lower()
+            if fname.startswith("icn") or "pdf" in fname:
+                continue  # PDF·아이콘류 제외 (상세컷 아님)
             if u not in detail_images:
                 detail_images.append(u)
         gallery = [BASE + i["url"] for i in data.get("images", [])
