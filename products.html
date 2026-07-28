@@ -47,8 +47,6 @@
 .review-link { display:inline-block; margin-left:8px; font-size:12px; font-weight:700; color:var(--primary); text-decoration:underline; }
 .product-desc { font-size:13px; color:var(--muted); line-height:1.6; margin-bottom:14px; flex:1; }
 
-.unit-price { font-size:12px; color:var(--primary); font-weight:700; margin-top:-8px; margin-bottom:12px; }
-.unit-price span { color:var(--muted); font-weight:400; }
 .product-price-row { display:flex; align-items:flex-end; gap:8px; margin-bottom:14px; }
 .product-sale-price { font-size:22px; font-weight:900; color:var(--red); }
 .product-info { font-size:11px; color:var(--muted); }
@@ -190,7 +188,6 @@
         <span class="margin-chip">대행가 · 수수료 포함</span>
         <span style="font-size:12px;color:var(--muted)" id="modal-info"></span>
       </div>
-      <div class="unit-price" id="modal-unit-price"></div>
       <div style="font-size:12px;color:var(--muted);margin-bottom:8px">
         ✔ 수수료(최대 15%)는 <strong>할인이 적용된 실구매가</strong> 기준이며, 할인 상품의 대행가는 <strong>항상 정가보다 낮습니다</strong>
       </div>
@@ -302,7 +299,6 @@ function renderProducts() {
             <small>+ 택배비 별도</small>
           </div>
         </div>
-        ${p.unit_price ? `<div class="unit-price">개당 약 ${p.unit_price.toLocaleString()}원 <span>(${p.unit_count}개 기준)</span></div>` : ''}
         <div style="display:flex; gap:8px;">
           <button class="product-btn" style="flex:1" onclick="openModal(${p.id})">상세보기</button>
           <button class="product-btn" style="flex:1; background:var(--red)" onclick="addCart(${p.id})"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> 담기</button>
@@ -390,8 +386,6 @@ function openModal(id) {
         `<img src="${u}" loading="lazy" style="width:100%;display:block;border-radius:8px;margin-bottom:6px" onerror="this.remove()">`).join('')
     : '';
   document.getElementById('modal-price').textContent = p.sale_price.toLocaleString() + '원';
-  document.getElementById('modal-unit-price').innerHTML = p.unit_price
-    ? `개당 약 ${p.unit_price.toLocaleString()}원 <span>(${p.unit_count}개 기준)</span>` : '';
   document.getElementById('modal-info').innerHTML = '택배비 별도<br>최대 ' + p.max_qty + '개 주문 가능';
   document.getElementById('modal-cold-notice').hidden = !p.cold;
   document.getElementById('modal-order-btn').href = `order.html?id=${p.id}&name=${encodeURIComponent(p.name)}&price=${p.sale_price}`;
