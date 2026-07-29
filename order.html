@@ -320,6 +320,7 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script src="js/firebase-init.js"></script>
+<script src="js/store-items.js"></script>
 <script>
 function makeOrderNo() {
   const d = new Date();
@@ -371,10 +372,9 @@ const presetId = params.get('id');
 
 let isRollover = false; // 마감 지난 후의 주문 = 다음 주 이월
 
-fetch('data/products.json')
-  .then(r => r.json())
-  .then(data => {
-    products = data.products;
+Promise.all([fetch('data/products.json').then(r => r.json()), loadStoreItems()])
+  .then(([data, store]) => {
+    products = [...store, ...data.products];   // 매장 상품 병합 (문자열 id 'S…')
     isRollover = new Date(data.order_deadline) <= new Date();
     if (isRollover) {
       document.getElementById('deadline-notice').style.display = 'none';
@@ -387,8 +387,10 @@ fetch('data/products.json')
     const cartItems = Cart.items().filter(it => products.some(p => p.id === it.id));
     cartItems.forEach(it => addItem(it.id, it.qty));
     // 상세 모달의 '바로 주문'으로 넘어온 상품 (장바구니에 없으면 행 추가)
-    const pid = presetId ? parseInt(presetId) : null;
-    if (pid && !cartItems.some(it => it.id === pid)) addItem(pid);
+    // presetId는 온라인 int·매장 'S…' 문자열 둘 다 가능 → 실제 상품에서 canonical id 확보
+    let pid = null;
+    if (presetId) { const pp = products.find(p => p.id == presetId); pid = pp ? pp.id : null; }
+    if (pid != null && !cartItems.some(it => it.id === pid)) addItem(pid);
     if (!document.querySelector('.item-row')) addItem(null);
   });
 
@@ -458,7 +460,7 @@ function renderPickerPage() {
   if (!pkFiltered.length) { list.innerHTML = '<p class="pk-empty">검색 결과가 없습니다</p>'; return; }
   const page = pkFiltered.slice(pkShown, pkShown + PK_PAGE);
   list.insertAdjacentHTML('beforeend', page.map(p => `
-    <button type="button" class="pk-item" onclick="pickProduct(${p.id})">
+    <button type="button" class="pk-item" onclick="pickProduct('${p.id}')">
       <img src="${esc(p.image || IMG_PH)}" alt="" onerror="this.onerror=null;this.src=IMG_PH">
       <div>
         <div class="pk-name">${esc(p.name)}</div>
@@ -527,7 +529,7 @@ function updateSummary() {
     total += subtotal;
     summaryLines.push(`<div class="summary-row" data-pid="${opt.value}"><span>${esc(name)} × ${Math.min(qty,max)}</span><span>${subtotal.toLocaleString()}원</span></div>`);
     itemTexts.push(`${name} × ${Math.min(qty,max)}개 (${subtotal.toLocaleString()}원)`);
-    cartSync.push({ id: parseInt(opt.value), name, price, qty: Math.min(qty, max) });
+    cartSync.push({ id: opt.value[0] === 'S' ? opt.value : parseInt(opt.value), name, price, qty: Math.min(qty, max) });
   });
 
   // 주문서 내용을 장바구니에 그대로 반영 (삭제·변경 동기화)

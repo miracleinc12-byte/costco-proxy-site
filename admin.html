@@ -49,6 +49,25 @@
 .mini-btn:hover { opacity:.88; }
 .empty-msg { text-align:center; color:var(--muted); padding:60px; }
 #user-bar { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:10px; }
+
+/* 매장 상품 등록 폼 */
+.sf-group { margin-bottom:12px; }
+.sf-group label { display:block; font-size:12px; font-weight:700; color:var(--muted); margin-bottom:4px; }
+.sf-group input, .sf-group textarea {
+  width:100%; padding:9px 11px; border:1.5px solid var(--border); border-radius:8px;
+  font-size:14px; font-family:inherit; box-sizing:border-box;
+}
+.sf-group textarea { resize:vertical; }
+.sf-preview { font-size:14px; font-weight:900; color:var(--primary); margin:-4px 0 12px; }
+.store-item {
+  display:grid; grid-template-columns:70px 1fr auto; gap:14px; align-items:center;
+  background:#fff; border-radius:10px; box-shadow:var(--shadow); padding:12px 14px; margin-bottom:10px;
+}
+.store-item img { width:70px; height:70px; object-fit:contain; background:var(--bg); border-radius:8px; }
+.store-item .si-name { font-weight:700; font-size:14px; margin-bottom:3px; }
+.store-item .si-sub { font-size:12px; color:var(--muted); }
+.store-item.hidden-item { opacity:.5; }
+@media(max-width:900px){ #view-store > div { grid-template-columns:1fr !important; } }
 </style>
 </head>
 <body>
@@ -76,6 +95,7 @@
       <h1 style="font-size:22px;font-weight:900">📋 관리자</h1>
       <button class="mini-btn" id="tab-orders" onclick="switchView('orders')">주문 관리</button>
       <button class="mini-btn gray" id="tab-board" onclick="switchView('board')">게시판 관리 <span id="inq-badge"></span></button>
+      <button class="mini-btn gray" id="tab-store" onclick="switchView('store')">매장 상품</button>
     </div>
     <div style="display:flex;align-items:center;gap:12px">
       <span id="user-email" style="font-size:13px;color:var(--muted)"></span>
@@ -95,6 +115,38 @@
     <div id="inquiry-list"><div class="empty-msg">불러오는 중...</div></div>
     <h2 style="font-size:16px;font-weight:900;margin:26px 0 12px">📝 공개 게시판</h2>
     <div id="board-list"><div class="empty-msg">불러오는 중...</div></div>
+  </div>
+
+  <!-- 매장 상품 관리 뷰 -->
+  <div id="view-store" style="display:none">
+    <div style="display:grid;grid-template-columns:360px 1fr;gap:24px;align-items:start">
+      <!-- 등록 폼 -->
+      <div class="order-card" style="margin:0">
+        <h2 style="font-size:16px;font-weight:900;margin-bottom:14px">🏪 매장 상품 등록</h2>
+        <div class="sf-group"><label>상품명 <span style="color:var(--red)">*</span></label>
+          <input type="text" id="sf-name" placeholder="예) 커클랜드 크루아상 12입"></div>
+        <div class="sf-group"><label>코스트코 매장가(원) <span style="color:var(--red)">*</span></label>
+          <input type="number" id="sf-price" min="0" placeholder="예) 9980" oninput="sfPreview()"></div>
+        <div class="sf-preview" id="sf-preview">대행가: -</div>
+        <div class="sf-group"><label>단위</label>
+          <input type="text" id="sf-unit" placeholder="예) 1박스 24입"></div>
+        <div class="sf-group"><label>카테고리</label>
+          <input type="text" id="sf-category" placeholder="매장 인기템" value="매장 인기템"></div>
+        <div class="sf-group"><label>설명</label>
+          <textarea id="sf-desc" rows="3" placeholder="상품 설명 (선택)"></textarea></div>
+        <label style="display:flex;align-items:center;gap:8px;font-size:14px;margin-bottom:12px;cursor:pointer">
+          <input type="checkbox" id="sf-cold"> 냉장·냉동 상품 (여름철 6~9월 자동 숨김)</label>
+        <div class="sf-group"><label>사진 <span style="color:var(--red)">*</span></label>
+          <input type="file" id="sf-photo" accept="image/*" capture="environment" onchange="sfPhoto(event)"></div>
+        <img id="sf-photo-preview" style="display:none;width:100%;max-height:220px;object-fit:contain;background:var(--bg);border-radius:8px;margin-bottom:12px">
+        <button class="mini-btn" style="width:100%;padding:12px" id="sf-submit" onclick="sfRegister()">상품 등록</button>
+      </div>
+      <!-- 등록된 목록 -->
+      <div>
+        <h2 style="font-size:16px;font-weight:900;margin:6px 0 12px">등록된 매장 상품</h2>
+        <div id="store-list"><div class="empty-msg">불러오는 중...</div></div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -125,6 +177,7 @@ auth.onAuthStateChanged(user => {
     document.getElementById('user-email').textContent = user.email;
     subscribeOrders();
     subscribeBoard();
+    subscribeStore();
   } else if (unsubscribe) {
     unsubscribe();
   }
@@ -134,8 +187,10 @@ auth.onAuthStateChanged(user => {
 function switchView(v) {
   document.getElementById('view-orders').style.display = v === 'orders' ? 'block' : 'none';
   document.getElementById('view-board').style.display = v === 'board' ? 'block' : 'none';
+  document.getElementById('view-store').style.display = v === 'store' ? 'block' : 'none';
   document.getElementById('tab-orders').className = 'mini-btn' + (v === 'orders' ? '' : ' gray');
   document.getElementById('tab-board').className = 'mini-btn' + (v === 'board' ? '' : ' gray');
+  document.getElementById('tab-store').className = 'mini-btn' + (v === 'store' ? '' : ' gray');
 }
 
 function subscribeOrders() {
@@ -283,6 +338,116 @@ async function saveReply(id) {
 async function deleteDoc(col, id) {
   if (!confirm('정말 삭제할까요? 되돌릴 수 없습니다.')) return;
   try { await db.collection(col).doc(id).delete(); }
+  catch (err) { alert('삭제 실패: ' + err.message); }
+}
+
+// ── 매장 상품 관리 ──
+const sfSale = p => Math.round(p * 1.15 / 100) * 100;  // 대행가 규칙 (온라인과 동일)
+let sfPhotoData = '';
+
+function sfPreview() {
+  const p = parseInt(document.getElementById('sf-price').value) || 0;
+  document.getElementById('sf-preview').textContent =
+    p > 0 ? `대행가: ${sfSale(p).toLocaleString()}원 (수수료 15% 포함)` : '대행가: -';
+}
+
+// 사진 선택 시 canvas로 다운스케일(최대 변 800px) → jpeg base64
+function sfPhoto(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const img = new Image();
+    img.onload = () => {
+      const max = 800, scale = Math.min(1, max / Math.max(img.width, img.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.round(img.width * scale);
+      cv.height = Math.round(img.height * scale);
+      cv.getContext('2d').drawImage(img, 0, 0, cv.width, cv.height);
+      sfPhotoData = cv.toDataURL('image/jpeg', 0.72);
+      const prev = document.getElementById('sf-photo-preview');
+      prev.src = sfPhotoData;
+      prev.style.display = 'block';
+    };
+    img.src = ev.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function sfRegister() {
+  const name = document.getElementById('sf-name').value.trim();
+  const costcoPrice = parseInt(document.getElementById('sf-price').value) || 0;
+  if (!name) return alert('상품명을 입력해주세요.');
+  if (costcoPrice <= 0) return alert('코스트코 매장가를 입력해주세요.');
+  if (!sfPhotoData) return alert('상품 사진을 첨부해주세요.');
+  const btn = document.getElementById('sf-submit');
+  btn.disabled = true; btn.textContent = '등록 중...';
+  try {
+    await db.collection('store_products').add({
+      name,
+      costcoPrice,
+      salePrice: sfSale(costcoPrice),
+      unit: document.getElementById('sf-unit').value.trim(),
+      category: document.getElementById('sf-category').value.trim() || '매장 인기템',
+      description: document.getElementById('sf-desc').value.trim(),
+      cold: document.getElementById('sf-cold').checked,
+      maxQty: 3,
+      imageData: sfPhotoData,
+      active: true,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    // 폼 초기화 (목록은 onSnapshot이 자동 갱신)
+    ['sf-name','sf-price','sf-unit','sf-desc'].forEach(id => document.getElementById(id).value = '');
+    document.getElementById('sf-category').value = '매장 인기템';
+    document.getElementById('sf-cold').checked = false;
+    document.getElementById('sf-photo').value = '';
+    document.getElementById('sf-photo-preview').style.display = 'none';
+    sfPhotoData = ''; sfPreview();
+    alert('등록되었습니다.');
+  } catch (err) {
+    alert('등록 실패: ' + err.message);
+  } finally {
+    btn.disabled = false; btn.textContent = '상품 등록';
+  }
+}
+
+function subscribeStore() {
+  db.collection('store_products').orderBy('createdAt', 'desc')
+    .onSnapshot(snap => {
+      const wrap = document.getElementById('store-list');
+      wrap.innerHTML = snap.empty
+        ? '<div class="empty-msg">등록된 매장 상품이 없습니다.</div>'
+        : snap.docs.map(d => {
+            const p = d.data();
+            const active = p.active !== false;
+            return `
+              <div class="store-item ${active ? '' : 'hidden-item'}">
+                <img src="${esc(p.imageData || '')}" alt="">
+                <div>
+                  <div class="si-name">${esc(p.name)}</div>
+                  <div class="si-sub">대행가 ${(p.salePrice || 0).toLocaleString()}원 · ${esc(p.unit) || '단위 없음'}${p.cold ? ' · ❄️냉장' : ''}</div>
+                  <div class="si-sub">${active ? '🟢 노출 중' : '⚪ 숨김'}</div>
+                </div>
+                <div style="display:flex;flex-direction:column;gap:6px">
+                  <button class="mini-btn gray" onclick="toggleStore('${d.id}', ${active})">${active ? '숨기기' : '노출'}</button>
+                  <button class="mini-btn" style="background:var(--red)" onclick="deleteStore('${d.id}')">삭제</button>
+                </div>
+              </div>`;
+          }).join('');
+    }, err => {
+      document.getElementById('store-list').innerHTML =
+        `<div class="empty-msg">⚠️ 매장 상품을 읽을 수 없습니다.<br><small>${esc(err.message)}</small></div>`;
+    });
+}
+
+async function toggleStore(id, active) {
+  try { await db.collection('store_products').doc(id).update({ active: !active }); }
+  catch (err) { alert('변경 실패: ' + err.message); }
+}
+
+async function deleteStore(id) {
+  if (!confirm('이 매장 상품을 삭제할까요? 되돌릴 수 없습니다.')) return;
+  try { await db.collection('store_products').doc(id).delete(); }
   catch (err) { alert('삭제 실패: ' + err.message); }
 }
 

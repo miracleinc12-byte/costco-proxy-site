@@ -86,16 +86,19 @@
 </footer>
 
 <script src="js/cart.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/store-items.js"></script>
 <script>
 let productMap = {}; // id → 상품 정보 (이미지·최대수량 표시용)
 
-fetch('data/products.json')
-  .then(r => r.json())
-  .then(data => {
+Promise.all([fetch('data/products.json').then(r => r.json()), loadStoreItems()])
+  .then(([data, store]) => {
     if (Cart.syncWeek(data.week)) {
       Cart.toast('상품이 새 주차로 바뀌어 장바구니를 비웠습니다');
     }
-    data.products.forEach(p => productMap[p.id] = p);
+    [...store, ...data.products].forEach(p => productMap[p.id] = p);
     render();
   })
   .catch(() => render());
@@ -130,11 +133,11 @@ function render() {
               <div class="ci-unitmax">${p ? '📦 ' + p.unit + ' · ' : ''}최대 ${max}개</div>
             </div>
             <div class="qty-box">
-              <button class="qty-btn" onclick="changeQty(${it.id}, -1)" ${it.qty <= 1 ? 'disabled' : ''}>−</button>
+              <button class="qty-btn" onclick="changeQty('${it.id}', -1)" ${it.qty <= 1 ? 'disabled' : ''}>−</button>
               <span class="qty-val">${it.qty}</span>
-              <button class="qty-btn" onclick="changeQty(${it.id}, 1)" ${it.qty >= max ? 'disabled' : ''}>+</button>
+              <button class="qty-btn" onclick="changeQty('${it.id}', 1)" ${it.qty >= max ? 'disabled' : ''}>+</button>
             </div>
-            <button class="ci-remove" onclick="removeItem(${it.id})" title="삭제">✕</button>
+            <button class="ci-remove" onclick="removeItem('${it.id}')" title="삭제">✕</button>
           </div>`;
       }).join('')}
       <div class="cart-summary">
@@ -152,7 +155,7 @@ function render() {
 
 function changeQty(id, delta) {
   const items = Cart.items();
-  const it = items.find(x => x.id === id);
+  const it = items.find(x => x.id == id);   // id는 문자열(매장 S…)·정수(온라인) 혼재 → loose
   if (!it) return;
   const max = productMap[id] ? productMap[id].max_qty : 3;
   it.qty = Math.max(1, Math.min(it.qty + delta, max));
@@ -161,7 +164,7 @@ function changeQty(id, delta) {
 }
 
 function removeItem(id) {
-  Cart.remove(id);
+  Cart.setAll(Cart.items().filter(x => x.id != id));   // loose: 매장 문자열 id 대응 (cart.js 미변경)
   render();
 }
 

@@ -215,16 +215,19 @@
 </footer>
 
 <script src="js/cart.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script src="js/firebase-init.js"></script>
+<script src="js/store-items.js"></script>
 <script>
 let allProducts = [];
 let currentCat = '전체';
 let currentPage = 1;
 const PAGE_SIZE = 12;
 
-fetch('data/products.json')
-  .then(r => r.json())
-  .then(data => {
-    allProducts = data.products;
+Promise.all([fetch('data/products.json').then(r => r.json()), loadStoreItems()])
+  .then(([data, store]) => {
+    allProducts = [...store, ...data.products];   // 매장 상품이 목록 맨 앞에
     if (Cart.syncWeek(data.week)) {
       Cart.toast('상품이 새 주차로 바뀌어 장바구니를 비웠습니다');
     }
@@ -247,7 +250,7 @@ fetch('data/products.json')
     tick(); setInterval(tick, 1000);
 
     // 카테고리 버튼 생성
-    const cats = ['전체', ...new Set(data.products.map(p => p.category))];
+    const cats = ['전체', ...new Set(allProducts.map(p => p.category))];
     const bar = document.getElementById('filter-bar');
     bar.innerHTML = cats.map(c =>
       `<button class="filter-btn ${c==='전체'?'active':''}" data-cat="${c}">${c}</button>`
@@ -300,8 +303,8 @@ function renderProducts() {
           </div>
         </div>
         <div style="display:flex; gap:8px;">
-          <button class="product-btn" style="flex:1" onclick="openModal(${p.id})">상세보기</button>
-          <button class="product-btn" style="flex:1; background:var(--red)" onclick="addCart(${p.id})"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> 담기</button>
+          <button class="product-btn" style="flex:1" onclick="openModal('${p.id}')">상세보기</button>
+          <button class="product-btn" style="flex:1; background:var(--red)" onclick="addCart('${p.id}')"><svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> 담기</button>
         </div>
       </div>
     </div>
@@ -344,14 +347,14 @@ function goPage(page) {
 }
 
 function addCart(id) {
-  const p = allProducts.find(x => x.id === id);
+  const p = allProducts.find(x => x.id == id);
   if (!p) return;
   Cart.add(p);
   Cart.toast(`"${p.name}" 담았습니다 (${Cart.count()}개)`);
 }
 
 function openModal(id) {
-  const p = allProducts.find(x => x.id === id);
+  const p = allProducts.find(x => x.id == id);
   if (!p) return;
   document.getElementById('modal-cart-btn').onclick = () => { addCart(id); closeModal(); };
   const modalImg = document.getElementById('modal-img');
